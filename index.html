@@ -126,6 +126,11 @@ button{font:inherit;color:inherit}
 @media (min-width:380px){.pf-emojis{grid-template-columns:repeat(6,minmax(44px,1fr))}}
 .pf-emojis button{min-height:44px;min-width:44px;font-size:1.4rem;border-radius:12px;border:2px solid var(--line);background:var(--surface);cursor:pointer;padding:0}
 .pf-emojis button[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.ms-grades button{font-family:var(--display);font-weight:600}
+.pf-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0}
+.pf-foot .btn{flex:none}
+.pf-names .field.ms-class{flex:0 0 34%}
+.school-ask{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .profile-dlg .row > .btn{flex:1 1 100px}
 .login-body{display:flex;flex-direction:column;gap:14px;background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:20px;margin-top:8px}
 .login-roles{display:flex;flex-direction:column;gap:12px}
@@ -307,6 +312,33 @@ ol.steps{padding-left:1.3em;display:flex;flex-direction:column;gap:8px}
 .dt th,.dt td{border:2px solid var(--line);padding:8px 10px;text-align:left}
 .dt th{background:var(--soft);font-family:var(--display);font-weight:600}
 .dt td.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--display);font-size:1.1rem}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* School assessments (Peter, 05.11.): filters, table; on narrow screens every row becomes a card */
+.psfilters{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;margin:10px 0 6px}
+.psfilters label{display:flex;flex-direction:column;gap:2px;font-size:.85rem;font-weight:600}
+.psfilters select{min-height:40px;font:inherit;font-weight:400;border:2px solid var(--line);border-radius:10px;padding:4px 8px;background:var(--surface);color:inherit;max-width:100%}
+.psfilters label.pscheck{flex-direction:row;align-items:center;gap:6px;min-height:40px}
+.pstab{font-size:.95rem}
+.pstab>tbody>tr>td{vertical-align:top}
+.pslv{display:flex;flex-wrap:wrap;gap:4px}
+.pstab>tbody>tr.psdet>td{background:var(--soft)}
+.psdet h4{margin:10px 0 2px;font-size:.95rem}
+.psdet h4:first-child{margin-top:2px}
+.psdet ul{margin:0 0 4px 20px;padding:0}
+.psrub{font-size:.9rem;margin:2px 0 4px}
+.psrub th,.psrub td{padding:4px 6px}
+.pspend ul{margin:0 0 4px 20px;padding:0}
+@media (max-width:600px){
+  .pstab,.pstab>tbody,.pstab>tbody>tr,.pstab>tbody>tr>td{display:block;width:100%;box-sizing:border-box}
+  .pstab>thead{display:none}
+  .pstab{background:none}
+  .pstab>tbody>tr.psrow{border:2px solid var(--line);border-radius:12px;margin-top:10px;padding:6px 10px;background:var(--surface)}
+  .pstab>tbody>tr.psrow>td{border:0;padding:2px 0}
+  .pstab>tbody>tr.psrow>td[data-l]::before{content:attr(data-l) ": ";font-weight:600;color:var(--muted)}
+  .pstab>tbody>tr.psdet{border:2px solid var(--line);border-top:0;border-radius:0 0 12px 12px;margin-top:-6px}
+  .pstab>tbody>tr.psdet>td{border:0;padding:6px 10px}
+  .psrub{width:100%}
+}
 .answers{display:flex;flex-direction:column;gap:10px}
 .answers.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .answers.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -467,6 +499,7 @@ ol.steps{padding-left:1.3em;display:flex;flex-direction:column;gap:8px}
     </div>
     <div id="testBar" class="note-banner test-bar" hidden></div>
     <div id="savedNote" class="note-banner" role="status" hidden>Saved ✓</div>
+    <div id="schoolAsk" class="note-banner school-ask" hidden><span>🏫 Which grade are you in?</span><button class="btn small" id="schoolAskBtn" type="button" aria-haspopup="dialog">My school</button></div>
     <div id="rankNote" class="note-banner rank-note" role="status" hidden></div>
     <button class="today" id="todayBtn" type="button"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7.1L12 17.3 5.7 21l1.7-7.1L2 9.2l7.1-.6z"/></svg></span><span><span class="name">Practise Today</span><br><span class="sub" id="todaySub">8 questions from your focus topics</span></span></button>
     <div id="homeNote" class="note-banner" hidden></div>
@@ -476,7 +509,7 @@ ol.steps{padding-left:1.3em;display:flex;flex-direction:column;gap:8px}
     <button class="btn" id="sheetBtn" type="button">📄 Practice sheet (PDF / print)</button>
     <div id="mySheets" class="mysheets" hidden></div>
     <div class="foot">
-      <span>Topics from class, updated 30 October.</span>
+      <span>Topics from class.</span>
       <span class="row foot-buttons">
         <button class="btn small" id="aboutBtn" type="button">📖 How it works &amp; grown-ups</button>
         <button class="btn small" id="guideBtn" type="button">❓ Help</button>
@@ -496,9 +529,22 @@ ol.steps{padding-left:1.3em;display:flex;flex-direction:column;gap:8px}
         <div class="pf-bday"><select id="pfDay" aria-label="Day"></select><select id="pfMonth" aria-label="Month"></select><select id="pfYear" aria-label="Year"></select></div>
       </fieldset>
       <fieldset class="pf-set"><legend>Pick your emoji</legend><div id="pfEmojis" class="pf-emojis"></div></fieldset>
-      <p class="small">This stays on this device.</p>
+      <p class="small pf-foot"><span>This stays on this device.</span><button class="btn small" id="pfSchool" type="button" aria-haspopup="dialog">🏫 My school</button></p>
       <p id="pfMessage" class="small" role="status"></p>
       <div class="row"><button class="btn" id="pfClose" type="button">Close</button><button class="btn primary" id="pfSave" type="submit">Save</button></div>
+    </form>
+  </dialog>
+
+  <!-- MY SCHOOL (task "Schule und Klasse", Peter 05.11.): grade (required), class and school (optional). Only what the
+       child or the parents enter is shown - no fixed text names a school, class or teacher. -->
+  <dialog id="schoolDlg" class="profile-dlg" aria-labelledby="schoolTitle">
+    <form id="schoolForm" method="dialog">
+      <h2 id="schoolTitle">🏫 My school</h2>
+      <fieldset class="pf-set"><legend>Which grade are you in?</legend><div id="msGrades" class="pf-emojis ms-grades"></div></fieldset>
+      <div class="pf-names"><div class="field ms-class"><label for="msClass">Class</label><input id="msClass" type="text" maxlength="12" autocomplete="off"></div><div class="field"><label for="msSchool">School</label><input id="msSchool" type="text" maxlength="60" autocomplete="off"></div></div>
+      <p class="small">Class and school are optional. This helps Big Quest pick the right tasks. Your grown-ups can see it; a teacher only if your parents allow it.</p>
+      <p id="msMessage" class="small" role="status"></p>
+      <div class="row"><button class="btn" id="msClose" type="button">Later</button><button class="btn primary" id="msSave" type="submit">Save</button></div>
     </form>
   </dialog>
 
@@ -551,11 +597,11 @@ ol.steps{padding-left:1.3em;display:flex;flex-direction:column;gap:8px}
   <section id="about" class="screen" hidden>
     <div class="topbar" id="aboutTop">
       <button class="iconbtn" id="aboutBack" type="button" aria-label="Back to home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <span class="chip" id="aboutChip">📖 So funktioniert Big Quest</span>
+      <span class="chip" id="aboutChip">📖 Das Konzept von Big Quest</span>
       <span class="flags" role="group" aria-label="Sprache / Language"><button class="flag" id="tabDe" type="button" aria-label="Deutsch"><svg class="flagsvg" viewBox="0 0 30 18" aria-hidden="true"><rect width="30" height="6" fill="#000"/><rect y="6" width="30" height="6" fill="#DD0000"/><rect y="12" width="30" height="6" fill="#FFCE00"/></svg></button><button class="flag" id="tabEn" type="button" aria-label="English"><svg class="flagsvg" viewBox="0 0 38 20" aria-hidden="true"><rect width="38" height="20" fill="#fff"/><rect y="0.00" width="38" height="1.54" fill="#B22234"/><rect y="3.08" width="38" height="1.54" fill="#B22234"/><rect y="6.15" width="38" height="1.54" fill="#B22234"/><rect y="9.23" width="38" height="1.54" fill="#B22234"/><rect y="12.31" width="38" height="1.54" fill="#B22234"/><rect y="15.38" width="38" height="1.54" fill="#B22234"/><rect y="18.46" width="38" height="1.54" fill="#B22234"/><rect width="15.2" height="10.77" fill="#3C3B6E"/><circle cx="1.6" cy="1.5" r=".6" fill="#fff"/><circle cx="4.6" cy="1.5" r=".6" fill="#fff"/><circle cx="7.6" cy="1.5" r=".6" fill="#fff"/><circle cx="10.6" cy="1.5" r=".6" fill="#fff"/><circle cx="13.6" cy="1.5" r=".6" fill="#fff"/><circle cx="1.6" cy="4.1" r=".6" fill="#fff"/><circle cx="4.6" cy="4.1" r=".6" fill="#fff"/><circle cx="7.6" cy="4.1" r=".6" fill="#fff"/><circle cx="10.6" cy="4.1" r=".6" fill="#fff"/><circle cx="13.6" cy="4.1" r=".6" fill="#fff"/><circle cx="1.6" cy="6.7" r=".6" fill="#fff"/><circle cx="4.6" cy="6.7" r=".6" fill="#fff"/><circle cx="7.6" cy="6.7" r=".6" fill="#fff"/><circle cx="10.6" cy="6.7" r=".6" fill="#fff"/><circle cx="13.6" cy="6.7" r=".6" fill="#fff"/><circle cx="1.6" cy="9.3" r=".6" fill="#fff"/><circle cx="4.6" cy="9.3" r=".6" fill="#fff"/><circle cx="7.6" cy="9.3" r=".6" fill="#fff"/><circle cx="10.6" cy="9.3" r=".6" fill="#fff"/><circle cx="13.6" cy="9.3" r=".6" fill="#fff"/></svg></button></span>
     </div>
     <div class="row" role="tablist" id="aboutTabs">
-      <button class="btn small" id="tabInfo" type="button" role="tab">📖 So funktioniert Big Quest</button>
+      <button class="btn small" id="tabInfo" type="button" role="tab">📖 Das Konzept von Big Quest</button>
       <button class="btn small" id="tabSheets" type="button" role="tab">Elternbereich</button>
     </div>
     <article class="about" id="aboutBody"></article>
@@ -1455,7 +1501,7 @@ const EV_SPEC = {
   badge: ['day:day badge:str', 'skill:str'],
   review: ['day:day qid:str box:int', 'dueAt:day question:obj'],
   practice_day: ['day:day', ''],
-  profile_set: ['field:enum(name|lastName|birthday|emoji|kidLang|muted) value:any', ''],   // muted: the child's sound switch (3b-1b-4); lastName: task "Name und Geburtsdatum" (04.11.)
+  profile_set: ['field:enum(name|lastName|birthday|emoji|kidLang|muted|mySchool) value:any', ''],   // muted: the child's sound switch (3b-1b-4); lastName: task "Name und Geburtsdatum" (04.11.); mySchool {grade, cls?, school?, year}: task "Schule und Klasse" (05.11.)
   rank_seen: ['rank:str', ''],
   sheet_created: ['sheet:str day:day no:pos writing:enum(de|en) items:arr', ''],
   sheet_result: ['sheet:str index:int res:enum(ok|no|help) day:day qid:str', ''],
@@ -1644,7 +1690,7 @@ function lastWinsOrder(events, now) {
 //
 // The result looks exactly like what index.html keeps today, so the app can later read it unchanged:
 //   attempts, ev, due, total, best_<quest>, badges, tried, treeStage, rankSeen, sheets, sheetNo
-//   and the "last wins" values name, lastName, birthday, emoji, kidLang, focusMode, focusManual, unlocked, storyCap,
+//   and the "last wins" values name, lastName, birthday, mySchool, emoji, kidLang, focusMode, focusManual, unlocked, storyCap,
 //   greetDay, mysteryDone, bdayParty, chk_<studio>; and gaps (task 3b-0: {closed, active, hold}, see abGaps);
 //   grants, grantlog, lastBackup (task 3b-1c, see abGrant).
 // From the log of a person (task 3b-1c, area person:<id>): parentLang, muted, conceptSeen (the day it was opened) and
@@ -1949,7 +1995,7 @@ function deriveSchool(events, { now } = {}) {
 // No screen, no browser storage, no network: the storage access (module speicher) is passed in.
 //
 //   area names (one key ring each):
-//     kind:lern:<childId>    learning progress + name, last name, birthday child, parents, grant with "learning"
+//     kind:lern:<childId>    learning progress + name, last name, birthday, school child, parents, grant with "learning"
 //     kind:privat:<childId>  rest of the profile, settings, day hints ...  child, parents
 //     schule:<childId>       school data and gaps (the child's app computes with them, never shows them)
 //                                                                          child, parents, grant with "school"
@@ -1987,7 +2033,8 @@ const BER_TYP = {
   sheet_created: 'kind:lern', sheet_result: 'kind:lern', sheet_discarded: 'kind:lern',
   // task "Name und Geburtsdatum" (Peter, 04.11.): last name and birthday (with the year) go with the name - a teacher with
   // a grant tells children with the same first name apart by them
-  profile_set: { name: 'kind:lern', lastName: 'kind:lern', birthday: 'kind:lern', emoji: 'kind:privat', kidLang: 'kind:privat', muted: 'kind:privat' },
+  // task "Schule und Klasse" (Peter, 05.11.): grade, class and school - a teacher with a grant sees them next to the name
+  profile_set: { name: 'kind:lern', lastName: 'kind:lern', birthday: 'kind:lern', mySchool: 'kind:lern', emoji: 'kind:privat', kidLang: 'kind:privat', muted: 'kind:privat' },
   setting_set: 'kind:privat', list_set: 'kind:privat', checklist_set: 'kind:privat', day_flag: 'kind:privat', advent_open: 'kind:privat',
   joke_seen: 'kind:privat', story_read: 'kind:privat',
   school_import: 'schule', gap_state: 'schule', gap_active: 'schule',
@@ -3747,7 +3794,7 @@ async function bereichHolen(stand, { zugang, ich, meineSchluessel, alteSchluesse
 /* the child's values that come from its log (werkzeug/speicherstellen.json: bereich kind/eltern, abgleich protokoll,
    abgeleitet or letzte-gilt; tests/module/lesen.test.mjs compares both lists). Not here: treeStage (a device note:
    "the tree grew" is shown once per device - the tree itself follows the practice days), events. */
-const LESEN_KIND = Object.freeze(['attempts', 'ev', 'due', 'total', 'badges', 'tried', 'rankSeen', 'name', 'lastName', 'birthday', 'emoji',
+const LESEN_KIND = Object.freeze(['attempts', 'ev', 'due', 'total', 'badges', 'tried', 'rankSeen', 'name', 'lastName', 'birthday', 'mySchool', 'emoji',
   'bdayParty', 'sheets', 'sheetNo', 'focusMode', 'focusManual', 'unlocked', 'storyCap', 'greetDay', 'mysteryDone', 'storyRead',
   'jokeSeen', 'kidLang', 'gaps', 'grants', 'grantlog', 'lastBackup']);
 const LESEN_KIND_PRAEFIX = Object.freeze(['best_', 'chk_', 'advent']);
@@ -4957,6 +5004,61 @@ function kindLokalEntfernen({ ablage, kind } = {}) {
   return { bereiche: weg, schluessel };
 }
 
+/* ---------- a parent left the family (task "Konto loeschen - andere Geraete", follow-up of "Familienfassung bauen") ---------- */
+/* did this parent take himself out of his family on ANOTHER device (kontoDatenLoeschen with another parent staying:
+   family_set removed about himself, written by himself)? Only his own entry counts - another parent's entry about him
+   does not make his devices drop the children. An entry of this very device does not count: that is the deleting call
+   itself, which still has to send it (and may fail offline - then nothing leaves this device). A parent without a family
+   here -> false. */
+function elternAusgetreten({ ablage, konto, now } = {}) {
+  eldPruefen({ ablage, konto, now });
+  if (konto.art !== 'parent') return false;
+  const v = verbindungen({ ablage, konto, now });
+  if (!v.familie) return false;
+  const dieses = eldJson(ablage, GERAETEABGLEICH_SPEICHER.geraet, null);
+  return eldGewinner(eldLog(ablage, { familie: v.familie }).lesen(), 'family_set', now)
+    .some((e) => e.payload.removed === true && e.payload.person === konto.kennung && e.author === konto.kennung && e.device !== dieses);
+}
+
+/* what a parent who left the family keeps on this device - nothing: every child of the family (as kindLokalEntfernen:
+   device state, what was dropped, the app's data of the child), the family area (device state, log, what was dropped) and
+   his own area (device state, log, devices noted for removal). The account itself (key copy, device list, sessions,
+   recordings) the app drops on its own (kontoLokalWeg). behalten = { kinder: [id], familien: [id] } - what another
+   account on this device still needs stays (a child's own device with the parent logged in).
+   -> { kinder: [id with something removed], familie: id | null, bereiche: [area] } */
+function elternLokalEntfernen({ ablage, konto, now, behalten = {} } = {}) {
+  eldPruefen({ ablage, konto, now });
+  const v = verbindungen({ ablage, konto, now });
+  const bleibenK = new Set(Array.isArray(behalten.kinder) ? behalten.kinder : []), bleibenF = new Set(Array.isArray(behalten.familien) ? behalten.familien : []);
+  // the children of the family and the ones taken out earlier (a child of another family on this device is not touched)
+  const kinder = new Set([...v.kinder.map((c) => c.id), ...v.entfernt.filter((x) => x.role === 'child').map((x) => x.person)]);
+  const out = { kinder: [], familie: null, bereiche: [] };
+  for (const kind of [...kinder].sort()) {
+    if (bleibenK.has(kind)) continue;
+    const r = kindLokalEntfernen({ ablage, kind });
+    if (r.bereiche.length || r.schluessel) { out.kinder.push(kind); out.bereiche.push(...r.bereiche); }
+  }
+  const alle = [bereichName('person', konto.kennung)];
+  if (v.familie && !bleibenF.has(v.familie)) { out.familie = v.familie; alle.push(bereichName('familie', v.familie)); }
+  const st = eldJson(ablage, GERAETEABGLEICH_SPEICHER.staende, {});
+  if (eldObj(st)) {
+    const weg = alle.filter((a) => Object.prototype.hasOwnProperty.call(st, a));
+    for (const a of weg) delete st[a];
+    if (weg.length) { ablage.setItem(GERAETEABGLEICH_SPEICHER.staende, JSON.stringify(st)); out.bereiche.push(...weg); }
+  }
+  const ohne = (k, id) => { const o = eldJson(ablage, k, null); if (eldObj(o) && Object.prototype.hasOwnProperty.call(o, id)) { delete o[id]; ablage.setItem(k, JSON.stringify(o)); } };
+  ohne(GERAETEABGLEICH_SPEICHER.personen, konto.kennung);
+  if (out.familie) ohne(GERAETEABGLEICH_SPEICHER.familien, out.familie);
+  const verworfen = eldJson(ablage, GERAETEABGLEICH_SPEICHER.verworfen, null);
+  if (Array.isArray(verworfen)) {
+    const n = verworfen.filter((x) => !(eldObj(x) && alle.includes(x.bereich)));
+    if (n.length !== verworfen.length) ablage.setItem(GERAETEABGLEICH_SPEICHER.verworfen, JSON.stringify(n));
+  }
+  const entfernen = eldJson(ablage, GERAETEABGLEICH_SPEICHER.entfernen, null);
+  if (Array.isArray(entfernen)) ablage.setItem(GERAETEABGLEICH_SPEICHER.entfernen, JSON.stringify(entfernen.filter((x) => !(eldObj(x) && x.person === konto.kennung))));
+  return out;
+}
+
 /* ---------- after the first login ---------- */
 /* notes where a new account belongs - only for the result of konto.ersteAnmeldung (it carries anker/familie; an account
    from konto.anmelden finds this in its own area): a child -> its anchor; a parent invited by a parent -> that family;
@@ -5212,7 +5314,7 @@ async function abgleichMitVerbindungen({ ablage, zugang, konten: alleKonten, now
   // removed a deleted child's data) asks the directory first: a deleted account is not synced (its own area would be
   // made anew); the app logs it out. Costs one or two reads, only until the device knows the area.
   const bekannt = eldJson(ablage, GERAETEABGLEICH_SPEICHER.staende, {});
-  const konten = [];
+  let konten = [];
   for (const k of alleKonten) {
     if (!(eldObj(bekannt) && eldObj(bekannt[bereichName('person', k.kennung)])) && typeof k.anmeldename === 'string' && kontoName(k.anmeldename)) {
       const s = await kontoStand({ zugang, anmeldename: k.anmeldename });
@@ -5221,7 +5323,30 @@ async function abgleichMitVerbindungen({ ablage, zugang, konten: alleKonten, now
     konten.push(k);
   }
   if (!konten.length) return out;
-  const personen = kontoPersonen(...konten);
+  let personen = kontoPersonen(...konten);
+  // task "Konto loeschen - andere Geraete": a parent who took himself out of the family (family_set removed about himself,
+  // written on the device where he deleted his account) or whose own area is gone from the storage: this device drops
+  // everything of the family - the children, the family area, his own area - and reports him as deleted (the app logs him
+  // out and forgets the account). The other accounts on this device stay and keep what they need. -> true: konten changed
+  const austritte = () => {
+    const raus = konten.filter((k) => k.art === 'parent'
+      && ((out.bericht && out.bericht.bereiche[bereichName('person', k.kennung)] && out.bericht.bereiche[bereichName('person', k.kennung)].fehler === 'geloescht') || elternAusgetreten({ ablage, konto: k, now })));
+    if (!raus.length) return false;
+    const bleiben = konten.filter((k) => !raus.includes(k)), behalten = { kinder: [], familien: [] };
+    for (const k of bleiben) {
+      const v = verbindungen({ ablage, konto: k, now });
+      behalten.kinder.push(...v.kinder.map((c) => c.id), ...(k.art === 'child' ? [k.kennung] : []));
+      if (v.familie) behalten.familien.push(v.familie);
+    }
+    for (const k of raus) {
+      const r = elternLokalEntfernen({ ablage, konto: k, now, behalten });
+      for (const kind of r.kinder) if (!out.geloescht.includes(kind)) out.geloescht.push(kind);
+      if (!out.kontoGeloescht.includes(k.kennung)) out.kontoGeloescht.push(k.kennung);
+    }
+    konten = bleiben;
+    personen = konten.length ? kontoPersonen(...konten) : {};
+    return true;
+  };
   const sammeln = () => {
     const g = { familien: new Map(), kinder: new Map(), verzeichnis: {} };
     for (const k of konten) {
@@ -5232,6 +5357,8 @@ async function abgleichMitVerbindungen({ ablage, zugang, konten: alleKonten, now
     }
     return { familien: [...g.familien.values()], kinder: [...g.kinder.values()], verzeichnis: g.verzeichnis };
   };
+  // a parent already known to have left: not synced at all (nothing is sent in his name, nothing handed to him)
+  if (austritte() && !konten.length) return out;
   let plan = sammeln();
   for (let i = 0; i < EINLADUNG_RUNDEN; i++) {
     out.bericht = await geraetAbgleichen({ ablage, zugang, personen, kinder: plan.kinder, familien: plan.familien, verzeichnis: plan.verzeichnis, now, heute, geraetName, inDieApp });
@@ -5241,6 +5368,7 @@ async function abgleichMitVerbindungen({ ablage, zugang, konten: alleKonten, now
     for (const v of out.bericht.verworfen) {
       if (v.typ === 'member_added' && ELD_WARNEN.includes(v.grund) && !out.warnungen.some((x) => x.id === v.id)) out.warnungen.push({ id: v.id, art: 'schluessel', person: null, grund: v.grund, bereich: v.bereich });
     }
+    if (austritte()) { if (!konten.length) break; plan = sammeln(); continue; }
     if (out.bericht.limit !== undefined) { out.limit = out.bericht.limit; break; }
     if (!inDieApp) break;
     let geschrieben = 0;
@@ -5424,7 +5552,9 @@ async function geraetEntfernen({ ablage, zugang, konto, person, geraet, passwort
 //     logged in cannot do it). The last parent of a family: every child (as above), the family area, his own area and
 //     directory entries - the whole family is gone. With another parent: he leaves the family (family_set removed about
 //     himself, sent at once), his own area, directory entries and open invitations go; the other parent's next sync
-//     changes every key without him (module geraeteabgleich). The children stay with the other parent.
+//     changes every key without him (module geraeteabgleich). The children stay with the other parent - but not on his
+//     devices: this one drops the children and the family at once (kinder: entries with nurLokal), his other devices
+//     with their next sync (module einladung abgleichMitVerbindungen: elternAusgetreten).
 //   Honest limit (Peter, 05.11.): GitHub keeps old, encrypted versions in the git history. Without the keys they cannot
 //     be read - and the keys go with the directory entries. To remove them for good: docs/endgueltig-loeschen.md (delete
 //     the repository or rewrite its history). The family area keeps that the child existed (encrypted, for the parents).
@@ -5442,7 +5572,7 @@ const KINDDATEN_FORMAT = 'bq-kinddaten';
    not in the export), person (a grown-up's own settings - not the child's data). praefix: the key is a family of keys. */
 const KINDDATEN_STELLEN = Object.freeze([
   ['attempts', 'kind'], ['ev', 'kind'], ['due', 'kind'], ['best_', 'kind', 1], ['total', 'kind'], ['badges', 'kind'], ['tried', 'kind'],
-  ['treeStage', 'kind'], ['rankSeen', 'kind'], ['name', 'kind'], ['lastName', 'kind'], ['birthday', 'kind'], ['emoji', 'kind'],
+  ['treeStage', 'kind'], ['rankSeen', 'kind'], ['name', 'kind'], ['lastName', 'kind'], ['birthday', 'kind'], ['mySchool', 'kind'], ['emoji', 'kind'],
   ['bdayParty', 'kind'], ['sheets', 'kind'], ['sheetNo', 'kind'], ['focusMode', 'kind'], ['focusManual', 'kind'], ['unlocked', 'kind'],
   ['storyCap', 'kind'], ['greetDay', 'kind'], ['mysteryDone', 'kind'], ['storyRead', 'kind'], ['jokeSeen', 'kind'], ['chk_', 'kind', 1],
   ['advent', 'kind', 1], ['kidLang', 'kind'], ['muted', 'kind'], ['events', 'kind'],
@@ -5529,7 +5659,7 @@ function kdtBereiche(ablage, kind) {
 const KDT_TEXT = {
   de: {
     titel: 'Alle Daten von', erstellt: 'Erstellt am', von: 'von', stand: 'Stand: letzter Abgleich dieses Geräts. Die vollständige, maschinenlesbare Fassung steht in der JSON-Datei.',
-    profil: 'Profil', lernstand: 'Lernstand', blaetter: 'Übungsblätter', einstellungen: 'Einstellungen', schule: 'Einstufungen der Schule',
+    profil: 'Profil', lernstand: 'Lernstand', blaetter: 'Übungsblätter', einstellungen: 'Einstellungen', schule: 'Schulische Einstufungen',
     luecken: 'Lücken laut Schule', freigaben: 'Freigaben', protokoll: 'Protokoll der Freigaben', geraete: 'Geräte', zugriff: 'Wer hat einen Schlüssel',
     stellen: 'Jede Speicherstelle der App', hinweise: 'Gut zu wissen', ereignisse: 'Alle Einträge',
     feld: 'Feld', wert: 'Wert', bereich: 'Bereich', imExport: 'Im Export', grund: 'Hinweis', ja: 'ja', nein: 'nein', leer: '–',
@@ -5625,7 +5755,7 @@ async function kindDatenExport({ ablage, konto, kind, now, heute, sprache = 'de'
   const zeilen = (keys) => keys.filter((key) => Object.prototype.hasOwnProperty.call(d, key)).map((key) => ['<code>' + kdtEsc(key) + '</code>', kdtWert(d[key], T)]);
   const teile = [];
   const abschnitt = (titel, inhalt) => teile.push('<section><h2>' + kdtEsc(titel) + '</h2>' + inhalt + '</section>');
-  abschnitt(T.profil, kdtTabelle([T.feld, T.wert], zeilen(['name', 'lastName', 'birthday', 'emoji', 'kidLang', 'muted', 'bdayParty'])));
+  abschnitt(T.profil, kdtTabelle([T.feld, T.wert], zeilen(['name', 'lastName', 'birthday', 'mySchool', 'emoji', 'kidLang', 'muted', 'bdayParty'])));
   const antworten = log.filter((e) => e.type === 'answer').length;
   abschnitt(T.lernstand, kdtTabelle([T.feld, T.wert], [
     [kdtEsc(T.sterne), kdtWert(d.total, T)], [kdtEsc(T.abzeichen), kdtWert(d.badges ? Object.keys(d.badges).length : 0, T)],
@@ -5723,8 +5853,8 @@ async function kindDatenLoeschen({ ablage, zugang, konto, kind, now, heute, gera
 }
 
 /* US12.2: a parent deletes his own account (see the top). passwort = his current password (asked again).
-   -> { familieGeloescht (true: he was the last parent), kinder: [results of kindDatenLoeschen], bereiche, verzeichnis,
-        einladungen } - afterwards the app logs him out and forgets him on this device */
+   -> { familieGeloescht (true: he was the last parent), kinder: [results of kindDatenLoeschen - or { kind, nurLokal: true }
+        for a child that stays with the other parent and only leaves this device], bereiche, verzeichnis, einladungen } - afterwards the app logs him out and forgets him on this device */
 async function kontoDatenLoeschen({ ablage, zugang, konto, passwort, now, heute, geraetName, runden } = {}) {
   kdtPruefen({ ablage, konto, now });
   if (!kdtTag(heute)) throw kdtFalsch('"heute" (JJJJ-MM-TT) fehlt.');
@@ -5749,6 +5879,13 @@ async function kontoDatenLoeschen({ ablage, zugang, konto, passwort, now, heute,
   out.einladungen = await kdtEinladungenWeg(ablage, zugang, konto, verbindungen({ ablage, konto, now }), undefined, now);
   const sp = await kdtSpeicherLeeren(zugang, eigene, konto.anmeldename);
   out.bereiche = sp.bereiche; out.verzeichnis = sp.verzeichnis;
+  // another parent stays: the children's data and the family leave this device as well (kinder: nurLokal - nothing of the
+  // children was deleted in the storage; the app drops them from the device like a deleted child). His other devices do
+  // the same with their next sync (module einladung, elternAusgetreten).
+  if (andere.length) {
+    const l = elternLokalEntfernen({ ablage, konto, now });
+    for (const kind of l.kinder) out.kinder.push({ kind, bereiche: [], verzeichnis: 0, einladungen: 0, lokal: { bereiche: l.bereiche.filter((a) => a.endsWith(':' + kind)), schluessel: 0 }, nurLokal: true });
+  }
   return out;
 }
 
@@ -6098,7 +6235,7 @@ function anmGeraetKonten(liste) {
 /* ---------- storage and accounts (the only way of index.html to modules konto and github) ---------- */
 /* the access of this device to the storage of the accounts.
    speicher: KONTO_SPEICHER of the app - a storage with geraet() (tests: the simulation) or { art: 'github', repo, wurzel,
-   basis? } (test instance); ablage: the browser storage (access key bqt_gh); geraet: the device id; fetch: for GitHub.
+   basis? } (test instance); ablage: the browser storage (access key: GITHUB_TOKEN_SCHLUESSEL); geraet: the device id; fetch: for GitHub.
    -> the access, or null (no storage; test instance without access key) */
 function anmZugang(speicher, { ablage, geraet, fetch } = {}) {
   if (speicher && typeof speicher.geraet === 'function') return speicher.geraet(geraet);
@@ -6190,9 +6327,26 @@ async function anmKindBereit({ ablage, zugang, konto, now }) {
 /* ---------- the sync in the app (task "Abgleich in der App"; concept 9.1, 9.4) ---------- */
 const anmStaende = (ablage) => { try { const s = JSON.parse(ablage.getItem(GERAETEABGLEICH_SPEICHER.staende) || '{}'); return s && typeof s === 'object' && !Array.isArray(s) ? s : {}; } catch (e) { return {}; } };
 const anmEvents = (st) => (st && Array.isArray(st.log) ? st.log.map((x) => x && x.event).filter((e) => e && typeof e === 'object' && e.payload && typeof e.payload === 'object') : []);
-/* entries this device dropped while syncing (forgeries, missing rights; kept once, module geraeteabgleich) -> count */
+/* entries this device dropped while syncing (kept once, module geraeteabgleich) that the grown-ups are told of as a
+   number: only forgeries and entries without the right to write them (Peter, 05.11., from #139) - never the harmless
+   ones of the order of things (an author or device whose admission comes later, e.g. right after "Schluessel erneuern";
+   an older stand) or of a newer app version (a format this one does not know yet).
+     forged:          unterschrift, eintrag-passt-nicht, entschluesseln, geraet-fremd
+     without a right: nicht-mitglied, rolle-darf-nicht, bereich-falsch, nach-entfernung (a removed device, old keys),
+                      geraet-nicht-angemeldet from a device that was removed (the bundle "<device>/<n>" of a device with a
+                      device_removed this device knows - depending on the order the admission drops a removed device's
+                      entry with this reason before the check for nach-entfernung; found in the full test run, 05.11.)
+   -> count */
+const ANM_VERWORFEN_ZAEHLT = Object.freeze(['unterschrift', 'eintrag-passt-nicht', 'entschluesseln', 'geraet-fremd', 'nicht-mitglied', 'rolle-darf-nicht', 'bereich-falsch', 'nach-entfernung']);
 function anmVerworfen(ablage) {
-  try { const l = JSON.parse(ablage.getItem(GERAETEABGLEICH_SPEICHER.verworfen) || '[]'); return Array.isArray(l) ? l.length : 0; } catch (e) { return 0; }
+  try {
+    const l = JSON.parse(ablage.getItem(GERAETEABGLEICH_SPEICHER.verworfen) || '[]');
+    if (!Array.isArray(l)) return 0;
+    const entfernt = new Set();
+    for (const st of Object.values(anmStaende(ablage))) for (const e of anmEvents(st)) if (e.type === 'device_removed' && typeof e.payload.device === 'string') entfernt.add(e.payload.device);
+    const vomEntfernten = (v) => v.grund === 'geraet-nicht-angemeldet' && typeof v.kennung === 'string' && entfernt.has(v.kennung.split('/')[0]);
+    return l.filter((v) => v && typeof v === 'object' && (ANM_VERWORFEN_ZAEHLT.includes(v.grund) || vomEntfernten(v))).length;
+  } catch (e) { return 0; }
 }
 /* was this device removed (module geraete: device_removed with its id in an area it knows)? */
 function anmGeraetEntfernt({ ablage }) {
@@ -6213,6 +6367,19 @@ async function anmSpeicherFremd(zugang) {
   try { return !(await zugang.verbunden()); } catch (err) { if (err && typeof err.code === 'string') return false; throw err; }
 }
 
+/* ---------- task "Familienfassung bauen" (preparation of stage 4): export, deletion, school ratings ---------- */
+/* all data of a child (module kinddaten, US12.1) -> { daten, json, html, dateiname: { json, html } } */
+const anmKindExport = ({ ablage, konto, kind, now, heute, sprache }) => kindDatenExport({ ablage, konto, kind, now, heute, sprache });
+/* delete a child of the family (US12.2) - storage and this device; the app deletes its recordings itself */
+const anmKindLoeschen = ({ ablage, zugang, konto, kind, now, heute, geraetName }) => kindDatenLoeschen({ ablage, zugang, konto, kind, now, heute, ...(geraetName ? { geraetName } : {}) });
+/* delete the own account of a parent, with his password (US12.2) */
+const anmKontoLoeschen = ({ ablage, zugang, konto, passwort, now, heute, geraetName }) => kontoDatenLoeschen({ ablage, zugang, konto, passwort, now, heute, ...(geraetName ? { geraetName } : {}) });
+/* what this device holds of a child whose areas are gone from the storage (module einladung) */
+const anmKindLokalEntfernen = ({ ablage, kind }) => kindLokalEntfernen({ ablage, kind });
+/* the school ratings of a child from its log (area schule, school_import; module ableitung) - or null. The family build
+   has no SCHOOL_DATA: a child's ratings come into its account (werkzeug/schulbewertungen-uebernehmen.mjs). */
+const anmSchule = (events, now) => deriveSchool(events, { now });
+
 /* ---------- guides ---------- */
 /* replaces whole points "<li><b>Label</b> ...</li>" (or <p>) of a guide: ersatz = [[label, new text after the label]].
    A label that is missing is an error - a changed guide must not keep a wrong point silently. */
@@ -6227,7 +6394,7 @@ function anmPunkteErsetzen(text, ersatz) {
 }
 
 /* Set by the build (werkzeug/version.mjs) inside the encrypted vault; null when opened unbuilt. */
-const APP_VERSION={"n":143,"hash":"96c0416","date":"05.11.2026 21:09","draft":false};
+const APP_VERSION={"n":148,"hash":"b24890c","date":"06.11.2026 07:14","draft":false};
 /* Set by the build from werkzeug/konten.json (S3 login); null = no accounts, app runs without login. */
 /* Accounts v2 (S11 Stufe 1): normAccounts and the rules who sees which child are in module src/module/rechte.mjs. */
 /* Stage 3b, task "Anmeldung im Testbau": the storage of the accounts (module konto). Set only for the test build -
@@ -8437,7 +8604,7 @@ function renderHome(){
   renderTestBar();
   const acc=accountsOn(); $('#adultBtn').hidden=!acc; $('#logoutBtn').hidden=!acc; // Help by role (Peter, 01.11.): a logged-in child has one help button with the child guide only.
   $('#aboutBtn').hidden=acc; $('#aboutBtn').textContent='📖 How it works & grown-ups';
-  renderProfileBtn();
+  renderProfileBtn(); renderSchoolAsk();
   const c=$('#subjects'); c.innerHTML='';
   SUBJECTS.forEach(s=>{
     const n=s.items.filter(k=>focusTopics().includes(k)).length;
@@ -9173,6 +9340,48 @@ function saveProfile(){
   if(savedTimer) clearTimeout(savedTimer); savedTimer=setTimeout(hideSaved,4000);
 }
 function hideSaved(){ if(savedTimer) clearTimeout(savedTimer); savedTimer=null; const s=$('#savedNote'); if(s) s.hidden=true; }
+/* My school (task "Schule und Klasse", Peter 05.11.): the grade (1-6, required), class and school (optional free text).
+   The child enters it ("My school"), the parents can do it in the grown-ups area. Fixed texts never name a school, class or
+   teacher - only what the family enters is shown (to the child, the parents, and a teacher or the admin with a grant).
+   Stored as mySchool {grade, cls?, school?, year}: year = the school year it was entered in ('2026/27', from 1 August), so
+   the app notices a new school year and asks the parents once; the archive of an old year is a task of the next big
+   version (AX1). Tasks exist only for grade 3 so far (CONTENT_GRADE); another grade only gives the parents a note. */
+const GRADES=[1,2,3,4,5,6], CONTENT_GRADE=3;
+const schoolYearOf = (day=dayKey()) => { const [y,m]=day.split('-').map(Number), s=m>=8?y:y-1; return s+'/'+pad((s+1)%100); };
+function mySchool(raw){ const v=raw===undefined?store.get('mySchool',null):raw; return v && typeof v==='object' && GRADES.includes(+v.grade) ? v : null; }
+/* stores grade, class and school with the current school year and writes the event (only if something changed) */
+function saveMySchool(grade, cls, school){
+  const v={grade:+grade}; if(cls) v.cls=cls; if(school) v.school=school; v.year=schoolYearOf();
+  const old=mySchool(); if(old && JSON.stringify(old)===JSON.stringify(v)) return false;
+  store.set('mySchool',v); eventHook('profile_set',{field:'mySchool', value:v}); return true;
+}
+/* "Klasse 3B · Name of the school" - only what was entered; with grade: "Jahrgangsstufe 3 · …" */
+function schoolText(v, de, withGrade){
+  if(!v) return '';
+  return [withGrade?(de?'Jahrgangsstufe ':'Grade ')+v.grade:'', v.cls?(de?'Klasse ':'Class ')+v.cls:'', v.school||''].filter(Boolean).join(' · ');
+}
+/* the child's start page asks until the grade is entered - not modal, nothing waits for it (logged-in child only, like the
+   greeting; never the admin's test child) */
+function renderSchoolAsk(){
+  const a=$('#schoolAsk'); if(!a) return;
+  a.hidden=!(accountsOn() && !adultUser && studentSession() && !isTestAccount() && !mySchool());
+}
+function openMySchool(){
+  const v=mySchool()||{}, box=$('#msGrades'); box.innerHTML='';
+  GRADES.forEach(g=>{ const b=document.createElement('button'); b.type='button'; b.textContent=String(g); b.dataset.grade=String(g); b.setAttribute('aria-pressed',String(+v.grade===g)); b.setAttribute('aria-label','Grade '+g);
+    b.addEventListener('click',()=>box.querySelectorAll('button').forEach(o=>o.setAttribute('aria-pressed',String(o===b)))); box.appendChild(b); });
+  $('#msClass').value=String(v.cls||''); $('#msSchool').value=String(v.school||''); $('#msMessage').textContent='';
+  const dlg=$('#schoolDlg'); if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
+}
+function closeMySchool(){ const dlg=$('#schoolDlg'); if(dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
+function saveMySchoolDlg(){
+  const pick=$('#msGrades button[aria-pressed="true"]');
+  if(!pick){ $('#msMessage').textContent='Please choose your grade.'; return; }
+  saveMySchool(pick.dataset.grade, $('#msClass').value.trim().slice(0,12), $('#msSchool').value.trim().slice(0,60));
+  closeMySchool(); renderHome();
+  const s=$('#savedNote'); s.hidden=false;
+  if(savedTimer) clearTimeout(savedTimer); savedTimer=setTimeout(hideSaved,4000);
+}
 /* Version (S7): the child sees only a small "v17" at the end of About; adults see number,
    build time and commit, and can check on request whether a newer version is published. */
 const versionLabel = () => APP_VERSION ? 'v'+APP_VERSION.n+(APP_VERSION.draft?'-entwurf':'') : 'Entwicklungsstand';
@@ -9247,9 +9456,57 @@ function bindProfileAdmin(){
     renderHome(); renderSheets(); });
   const b=$('#profileDelete'); if(!b) return;
   b.addEventListener('click',()=>{ if(!parentAccess) return; if(!confirm(PL()==='de'?'Name, Nachname, Geburtstag und Emoji auf diesem Gerät löschen? Lerndaten bleiben.':'Delete name, last name, birthday and emoji on this device? Learning data stays.')) return;
-    ['name','lastName','birthday','emoji'].forEach(k=>store.del(k));
-    eventHook('profile_set',{field:'name', value:null}); eventHook('profile_set',{field:'lastName', value:null}); eventHook('profile_set',{field:'birthday', value:null}); eventHook('profile_set',{field:'emoji', value:null});
+    ['name','lastName','birthday','emoji','mySchool'].forEach(k=>store.del(k));
+    eventHook('profile_set',{field:'name', value:null}); eventHook('profile_set',{field:'lastName', value:null}); eventHook('profile_set',{field:'birthday', value:null}); eventHook('profile_set',{field:'emoji', value:null}); eventHook('profile_set',{field:'mySchool', value:null});
     renderHome(); renderSheets(); });
+}
+/* Grown-ups area, "For <child>": school and class (task "Schule und Klasse", Peter 05.11.) - see, add or change; the grade
+   is required, class and school are optional. The values go into the fields as values, never as HTML. */
+const gradeNoteText = (v, de) => v && +v.grade!==CONTENT_GRADE ? (de?`Für Jahrgangsstufe ${v.grade} gibt es in Big Quest noch keine Aufgaben. Ihr Kind übt weiter mit den Aufgaben der Jahrgangsstufe ${CONTENT_GRADE}.`:`Big Quest has no tasks for grade ${v.grade} yet. Your child keeps practicing with the grade ${CONTENT_GRADE} tasks.`) : '';
+function mySchoolAdminHTML(){
+  const de=PL()==='de', v=mySchool(), g=v?+v.grade:0, note=gradeNoteText(v, de);
+  const opts='<option value="">—</option>'+GRADES.map(n=>`<option value="${n}"${n===g?' selected':''}>${n}</option>`).join('');
+  const line=v?`<b>${esc(schoolText(v, de, true))}</b>${v.year?` <span class="small">· ${de?'Schuljahr':'school year'} ${esc(v.year)}</span>`:''}`:(de?'Noch nicht eingetragen.':'Not entered yet.');
+  return `<h2>${de?'Schule und Klasse':'School and class'}</h2><p id="pSchoolLine">${line}</p>${note?`<p class="phow pgrade-note">${note}</p>`:''}
+    <p class="small">${de?'Trägt Ihr Kind unter „My school“ ein – oder Sie hier. Nach der Jahrgangsstufe richten sich die Aufgaben. Eine Lehrkraft sieht Klasse und Schule nur mit Ihrer Freigabe.':'Your child enters this under “My school” – or you do it here. The tasks follow the grade. A teacher sees the class and school only with your grant.'}</p>
+    <details class="pschool-edit"><summary>${de?'Schule und Klasse ändern':'Change school and class'}</summary><form id="pSchoolForm" class="login-form">
+    <div class="field"><label for="psGrade">${de?'Jahrgangsstufe':'Grade'}</label><select id="psGrade">${opts}</select></div>
+    <div class="field"><label for="psClass">${de?'Klasse (freiwillig)':'Class (optional)'}</label><input id="psClass" maxlength="12" autocomplete="off"></div>
+    <div class="field"><label for="psSchool">${de?'Schule (freiwillig)':'School (optional)'}</label><input id="psSchool" maxlength="60" autocomplete="off"></div>
+    <p><button class="btn small primary" type="submit">${de?'Speichern':'Save'}</button></p><p id="pSchoolMsg" class="small" role="status"></p></form></details>`;
+}
+function bindMySchoolAdmin(){
+  const f=$('#pSchoolForm'); if(!f) return;
+  const v=mySchool()||{}; $('#psClass').value=String(v.cls||''); $('#psSchool').value=String(v.school||'');
+  f.addEventListener('submit',e=>{ e.preventDefault(); if(!parentAccess || isTeacher() || viewerGrant()) return;
+    const de=PL()==='de', g=$('#psGrade').value;
+    if(!g){ $('#pSchoolMsg').textContent=de?'Bitte die Jahrgangsstufe wählen.':'Please choose the grade.'; return; }
+    saveMySchool(g, $('#psClass').value.trim().slice(0,12), $('#psSchool').value.trim().slice(0,60));
+    renderHome(); renderSheets(); });
+}
+/* New school year (from 1 August): the parents are asked once, on the overview, whether the child moved up a grade.
+   Either answer stores the new school year, so the question does not come back. Moving up clears the class (it
+   usually changes; the parents enter the new one under "For <child>"). Otherwise, for a grade without tasks, one calm note. */
+let schoolYearDone='';
+function schoolYearLine(){
+  if(!parentAccess || isTeacher() || viewerGrant()) return '';
+  const v=mySchool(), de=PL()==='de', now=schoolYearOf(); if(!v) return '';
+  if(v.year && v.year<now){
+    const next=Math.min(+v.grade+1, GRADES[GRADES.length-1]);
+    const yes=next>+v.grade?`<button type="button" class="btn small" data-pyear="${next}">${de?`Ja, Jahrgangsstufe ${next}`:`Yes, grade ${next}`}</button> `:'';
+    return `<p class="phow pyear-note">📅 ${de?`Neues Schuljahr ${now}:`:`New school year ${now}:`} ${next>+v.grade?(de?`Ist Ihr Kind jetzt in Jahrgangsstufe ${next}?`:`Is your child in grade ${next} now?`):(de?`Bleibt Ihr Kind in Jahrgangsstufe ${v.grade}?`:`Does your child stay in grade ${v.grade}?`)} ${yes}<button type="button" class="btn small" data-pyear="${v.grade}">${next>+v.grade?(de?`Nein, bleibt ${v.grade}`:`No, stays in ${v.grade}`):(de?'Ja':'Yes')}</button></p>`;
+  }
+  const done=schoolYearDone; schoolYearDone='';
+  const note=gradeNoteText(v, de);
+  return (done?`<p class="phow pyear-note" role="status">✓ ${esc(done)}</p>`:'')+(note?`<p class="phow pgrade-note">${note}</p>`:'');
+}
+function answerSchoolYear(grade){
+  if(!parentAccess || isTeacher() || viewerGrant()) return;
+  const v=mySchool(), de=PL()==='de'; if(!v) return;
+  const up=+grade>+v.grade;
+  saveMySchool(grade, up?'':v.cls, v.school);
+  schoolYearDone=up?(de?`Gespeichert: Jahrgangsstufe ${grade}. Die neue Klasse können Sie unter ⚙ bei „Schule und Klasse“ eintragen.`:`Saved: grade ${grade}. You can enter the new class under ⚙ in “School and class”.`):(de?`Gespeichert: Jahrgangsstufe ${grade}.`:`Saved: grade ${grade}.`);
+  renderHome(); renderSheets();
 }
 
 /* challenge offer (Practise Today, last question) */
@@ -9799,7 +10056,7 @@ function parentHomeHTML(){
   const noKid=accountsOn() && !viewedKid() ? myKidsNote() : '';
   if(noKid) return noKid;   // nothing to show: without a logged-in child the data on this device are not the child's
   // concept 5.3 (B4): notes only when something is to do - data move, backup, waiting sheet, "new here?"
-  return `${migrLine()}${backupLine()}${note}${newHereLine()}${glanceHTML()}<div class="playout"><div class="psubjects">${tiles}</div><aside class="pside"><div class="pcard" id="pSummary">${summaryHTML(all)}</div><div class="pcard">${legendHTML()}</div></aside></div>`;
+  return `${migrLine()}${backupLine()}${note}${schoolYearLine()}${newHereLine()}${glanceHTML()}<div class="playout"><div class="psubjects">${tiles}</div><aside class="pside"><div class="pcard" id="pSummary">${summaryHTML(all)}</div><div class="pcard">${legendHTML()}</div></aside></div>`;
 }
 function legendHTML(){
   // one line, dot + word (concept 5.3, B4); "provisional / confirmed" is explained in the ⓘ of the summary
@@ -9920,7 +10177,7 @@ function grantsHTML(){
   const evText={erteilt:de?'erteilt':'granted', 'geöffnet':de?'angesehen':'viewed', widerrufen:de?'beendet':'ended', abgelaufen:de?'abgelaufen':'expired'};
   const protokoll=log.length?`<details class="pgrantlog"><summary>${de?'Protokoll':'Log'} (${log.length})</summary><ul>${log.slice().reverse().slice(0,30).map(e=>`<li>${fmtDay(e.at.slice(0,10))} · ${esc(name(e.grantee))} · ${esc(evText[e.ev]||e.ev)}${e.scope?` · ${sc(e.scope)}`:''}</li>`).join('')}</ul></details>`:'';
   return `<h2>${de?'Zugriff & Freigaben':'Access & grants'}</h2>
-    <p class="phow">${de?'Eine Lehrkraft oder der Admin sieht den Lernstand, Namen und Geburtsdatum Ihres Kindes nur, wenn Sie es hier freigeben – befristet, nur lesend, jederzeit beendbar.':'A teacher or the admin sees your child’s progress, name and date of birth only if you allow it here – for a limited time, read-only, and you can end it any time.'}</p>
+    <p class="phow">${de?'Eine Lehrkraft oder der Admin sieht den Lernstand, Namen, Geburtsdatum, Klasse und Schule Ihres Kindes nur, wenn Sie es hier freigeben – befristet, nur lesend, jederzeit beendbar.':'A teacher or the admin sees your child’s progress, name, date of birth, class and school only if you allow it here – for a limited time, read-only, and you can end it any time.'}</p>
     ${list}${protokoll}
     <form id="pGrantForm" class="login-form">
       <div class="field"><label for="pGrantWho">${de?'Anmeldename der Person':'Login name of the person'}</label><input id="pGrantWho" autocomplete="off" autocapitalize="off" spellcheck="false" required></div>
@@ -9933,8 +10190,8 @@ function grantsHTML(){
 }
 function grantConsentText(who, days, scope){
   const de=PL()==='de', sc=scope.map(x=>x==='school'?(de?'Schuldaten':'school ratings'):(de?'Lernstand':'learning progress')).join(de?' und ':' and ');
-  return de?`Sie geben ${who} für ${days} Tage Einblick in: ${sc}. ${who} sieht dabei Vor- und Nachnamen und das Geburtsdatum Ihres Kindes, aber nicht Emoji und Einstellungen. ${who} kann nichts ändern. Sie können das jederzeit beenden. Was ${who} bis dahin gesehen hat, kann man nicht ungesehen machen.`
-           :`You give ${who} access for ${days} days to: ${sc}. ${who} will see your child’s first and last name and date of birth, but not the emoji or settings. ${who} cannot change anything. You can end this at any time. What ${who} has seen until then cannot be unseen.`;
+  return de?`Sie geben ${who} für ${days} Tage Einblick in: ${sc}. ${who} sieht dabei Vor- und Nachnamen und das Geburtsdatum Ihres Kindes (und Jahrgangsstufe, Klasse und Schule, falls eingetragen), aber nicht Emoji und Einstellungen. ${who} kann nichts ändern. Sie können das jederzeit beenden. Was ${who} bis dahin gesehen hat, kann man nicht ungesehen machen.`
+           :`You give ${who} access for ${days} days to: ${sc}. ${who} will see your child’s first and last name and date of birth (and the grade, class and school, if entered), but not the emoji or settings. ${who} cannot change anything. You can end this at any time. What ${who} has seen until then cannot be unseen.`;
 }
 function bindGrants(body){
   const f=$('#pGrantForm'); if(!f) return;
@@ -9975,7 +10232,7 @@ function accountsAdminHTML(){
    restored after the move to IDs (S11 P2). Which keys belong to a child is fixed in
    werkzeug/speicherstellen.json (checked by tests/stufe1-p1.test.mjs). Never in a backup: passwords,
    sessions, device keys. Recordings are included (the file stays with the family). */
-const BACKUP_KEYS={exact:['grants','grantlog','attempts','ev','due','total','badges','tried','treeStage','rankSeen','name','lastName','birthday','emoji','bdayParty','sheets','sheetNo','focusMode','focusManual','unlocked','gaps','storyCap','greetDay','mysteryDone','kidLang'], prefix:['best_','chk_','advent']};
+const BACKUP_KEYS={exact:['grants','grantlog','attempts','ev','due','total','badges','tried','treeStage','rankSeen','name','lastName','birthday','emoji','mySchool','bdayParty','sheets','sheetNo','focusMode','focusManual','unlocked','gaps','storyCap','greetDay','mysteryDone','kidLang'], prefix:['best_','chk_','advent']};
 const isBackupKey = k => BACKUP_KEYS.exact.includes(k) || BACKUP_KEYS.prefix.some(p=>k.startsWith(p));
 function childStoreKeys(){
   const pre=storeKey('x').slice(0,-1), plain=pre==='bqt_', out=[];
@@ -10023,7 +10280,7 @@ function backupLine(){
   if(!p || (last && (p<=last || daysBetween(last,dayKey())<=30))) return '';
   return `<p class="phow pbackup-note">💾 ${last?(de?'Neue Übungen seit der letzten Sicherung':'New practice since the last backup'):(de?'Noch nie gesichert':'Not backed up yet')} <button type="button" class="btn small" data-backup>${de?'Jetzt sichern':'Back up now'}</button></p>`;
 }
-/* "New here?" (concept 5.3, B4): until the grown-up has opened "How Big Quest works" once on this device. */
+/* "New here?" (concept 5.3, B4): until the grown-up has opened "The Big Quest concept" once on this device. */
 const conceptSeenId = () => accountsOn() && adultUser ? ((APP_ACCOUNTS.users.find(u=>u.user===adultUser.user)||{}).id || adultUser.user) : 'pin';
 const conceptSeen = () => !!(store.get('conceptSeen',{})||{})[conceptSeenId()];
 function markConceptSeen(){ const s=store.get('conceptSeen',{})||{}; if(s[conceptSeenId()]) return; s[conceptSeenId()]=dayKey(); store.set('conceptSeen',s); eventHook('person_set',{field:'conceptSeen', value:dayKey()}); }
@@ -10101,7 +10358,7 @@ function undoRestore(){
    The sections keep their ids (settings, backup, grants, accounts) so their bindings and the open state stay as before. */
 function settingsSecs(){
   const lang=PL(), T=PT[lang], de=lang==='de', teacher=isTeacher(), kidOk=!accountsOn() || !!viewedKid(), kid=accountsOn()?viewedKid():null, s=[];
-  if(!teacher && kidOk) s.push(['settings', kid?(de?'👧 Für ':'👧 For ')+esc(kid):T.settings, storyCapHTML()+reminderHTML()+profileAdminHTML()]);
+  if(!teacher && kidOk) s.push(['settings', kid?(de?'👧 Für ':'👧 For ')+esc(kid):T.settings, storyCapHTML()+reminderHTML()+profileAdminHTML()+mySchoolAdminHTML()]);
   if(canBackup()) s.push(['backup', de?'💾 Sicherung & Daten':'💾 Backup & data', backupHTML()]);
   if(canBackup()) s.push(['grants', de?'🔐 Zugriff & Freigaben':'🔐 Access & grants', grantsHTML()]);
   if(accountsOn() && adultUser && adultUser.admin) s.push(['accounts', de?'🛠 Konten':'🛠 Accounts', accountsAdminHTML()]);
@@ -10120,8 +10377,17 @@ function aboutAppHTML(){
   const sec=(title,body,id)=>`<details class="about-sec" data-about="${id}"><summary>${title}</summary><div class="about-sec-body">${body}</div></details>`;
   return `<div class="pabout">${main.replace(/<h2>[^<]*<\/h2>/,'')}</div><div class="about-menu">`
     +(privacy?sec(privacy.title, privacy.body, 'privacy'):'')
+    +(KONTO_UI?sec(de?'Daten exportieren und löschen':'Export and delete data', kontoLoeschenInfoHTML(de), 'loeschen'):'')
     +sec(de?'Impressum':'Legal notice', `<p>${de?'Wird ergänzt.':'To be added.'}</p>`, 'imprint')
     +`</div>`+versionAdminHTML();
+}
+/* accounts in the storage (family build): export and deletion in plain words; removing old versions from GitHub's
+   history is the admin's job by hand (guide in the source repository, docs/endgueltig-loeschen.md) */
+const KONTO_LOESCHEN_ANLEITUNG='https://github.com/pahlborn/bis-school-app_src/blob/main/docs/endgueltig-loeschen.md';
+function kontoLoeschenInfoHTML(de){
+  return de
+    ? `<p>Eltern sichern und löschen die Daten eines Kindes unter ⚙ → „👪 Familie“ (📄 Daten, 🗑️ Löschen); dort steht auch „Mein Konto löschen“. Gelöscht wird im Speicher und auf allen Geräten der Familie, auch die Leseaufnahmen.</p><p>Ältere, verschlüsselte Stände bleiben in der Versionsgeschichte des Speichers bei GitHub; ohne Schlüssel sind sie nicht lesbar. Auf Wunsch entfernt der Admin auch sie: <a href="${KONTO_LOESCHEN_ANLEITUNG}" target="_blank" rel="noopener">Anleitung für den Admin</a>.</p>`
+    : `<p>Parents save and delete a child’s data under ⚙ → “👪 Family” (📄 Data, 🗑️ Delete); “Delete my account” is there, too. It is deleted in the storage and on every device of the family, recordings included.</p><p>Older, encrypted versions stay in the storage’s history at GitHub; without the keys nobody can read them. On request the admin removes them, too: <a href="${KONTO_LOESCHEN_ANLEITUNG}" target="_blank" rel="noopener">guide for the admin</a>.</p>`;
 }
 function settingsViewHTML(secHTML){
   const de=PL()==='de', close=accountsOn()?(de?'Abmelden':'Log out'):(de?'Sperren':'Lock');
@@ -10193,12 +10459,12 @@ function renderSheets(){
     html+=state.psubj ? parentSubjectHTML(state.psubj) : parentHomeHTML();
     // the chapters only on the overview, not again inside a subject (Peter, 01.11.)
     const onOverview=!state.psubj || (accountsOn() && !viewedKid());
-    // Concept 5.3 (B4): How Big Quest works · Supporting your child · School ratings · Practice sheets.
+    // Concept 5.3 (B4): The Big Quest concept · How to support your child · School assessments · Practice sheets (titles: Peter, 05.11.).
     // Settings, backup, grants, accounts and the version live in ⚙ (B1), the guide in ? (B2).
     const secs=[];
     secs.push(['concept', ABOUT_UI[lang].title, `<div class="about-menu">${aboutSectionsHTML(lang,null,true)}</div>`]);
-    secs.push(['support', de?'🤝 Ihr Kind unterstützen':'🤝 Supporting your child', supportGuideHTML()]);
-    if(accountsOn() && kidOk && !(viewerGrant() && !viewerGrant().scope.includes('school'))) secs.push(['school', de?'🏫 Bewertungen der Schule – Verlauf':'🏫 School evaluations – history', schoolHTML()]);
+    secs.push(['support', de?'🤝 So unterstützen Sie Ihr Kind':'🤝 How to support your child', supportGuideHTML()]);
+    if(accountsOn() && kidOk && !(viewerGrant() && !viewerGrant().scope.includes('school'))) secs.push(['school', de?'🏫 Schulische Einstufungen':'🏫 School assessments', schoolHTML()]);
     if(!teacher && kidOk) secs.push(['sheets', T.sheets, sheetsPageHTML()]);
     if(onOverview) html+=secHTML(secs);
   }
@@ -10210,7 +10476,7 @@ function renderSheets(){
   [['#pSettings','settings'],['#pHelp','help']].forEach(([sel,view])=>{ const b=$(sel); if(b) b.addEventListener('click',()=>{ if(!parentAccess) return; if(state.pview===view) closeParentView(); else openParentView(view); }); });
   ['#pSetBack','#pHelpBack'].forEach(sel=>{ const b=$(sel); if(b) b.addEventListener('click',closeParentView); });
   const real=$('#pRealData'); if(real) real.addEventListener('click',()=>{ if(!parentAccess) return; restoreRealChild(); renderSheets(); });
-  const kidSel=$('#pKidSel'); if(kidSel) kidSel.addEventListener('change',()=>{ const k=kidSel.value; if(!parentAccess || !kidChoices().includes(k)) return; const s=studentSession(); viewUser=(s && s.user===k)?null:k; state.psubj=null; renderSheets(); });
+  const kidSel=$('#pKidSel'); if(kidSel) kidSel.addEventListener('change',()=>{ const k=kidSel.value; if(!parentAccess || !kidChoices().includes(k)) return; const s=studentSession(); viewUser=(s && s.user===k)?null:k; state.psubj=null; state.sopen=[]; renderSheets(); });
   const play=$('#pPlayTest'); if(play) play.addEventListener('click',playTest);
   body.querySelectorAll('[data-psubj],[data-pmore]').forEach(b=>b.addEventListener('click',()=>{ state.psubj=b.dataset.psubj||b.dataset.pmore; renderSheets(); window.scrollTo(0,0); }));
   const back=$('#pBack'); if(back) back.addEventListener('click',()=>{ state.psubj=null; renderSheets(); window.scrollTo(0,0); });
@@ -10223,10 +10489,12 @@ function renderSheets(){
   body.querySelectorAll('details.psheet').forEach(d=>d.addEventListener('toggle',()=>{ if(d.open) state.psheetOpen=d.dataset.sheetid; else if(state.psheetOpen===d.dataset.sheetid) state.psheetOpen=null; }));
   body.querySelectorAll('[data-opensheet]').forEach(b=>b.addEventListener('click',()=>{ state.psheetOpen=b.dataset.opensheet; if(!open.includes('sheets')) open.push('sheets'); renderSheets(); const d=$('#aboutBody details.psheet[open]'); if(d) d.scrollIntoView({block:'start'}); }));
   body.querySelectorAll('[data-backup]').forEach(b=>b.addEventListener('click',makeBackup));
+  body.querySelectorAll('[data-pyear]').forEach(b=>b.addEventListener('click',()=>answerSchoolYear(b.dataset.pyear)));
   const rf=$('#pRestoreFile'); if(rf) rf.addEventListener('change',()=>{ if(rf.files && rf.files[0]) readRestoreFile(rf.files[0]); });
   body.querySelectorAll('[data-restoreundo]').forEach(b=>b.addEventListener('click',undoRestore));
   body.querySelectorAll('[data-migrretry]').forEach(b=>b.addEventListener('click',()=>{ try{ localStorage.removeItem('bqt_migr'); }catch(e){} location.reload(); }));
   bindGrants(body);
+  bindSchoolList(body);
   bindParentSettings();
   if(KONTO_UI) kontoBinden(body);
 }
@@ -10326,7 +10594,7 @@ function grantKidInfo(user){
   const acc=APP_ACCOUNTS.users.find(u=>u.user===user && u.role==='student'); if(!acc || acc.test) return null;
   const me=APP_ACCOUNTS.users.find(u=>u.user===adultUser.user)||{}; if(isParentOf(me, acc) || !myGrantFor(acc)) return null;
   const own=user===viewedKid(), val=(k,d)=>kidRead(acc,k,null) || (own ? store.get(k,null) : null) || d;
-  return {name:[val('name',''), val('lastName','')].map(x=>String(x||'').trim()).filter(Boolean).join(' '), bday:val('birthday',null)};
+  return {name:[val('name',''), val('lastName','')].map(x=>String(x||'').trim()).filter(Boolean).join(' '), bday:val('birthday',null), school:mySchool(val('mySchool',null))};
 }
 const grantKidName = user => (grantKidInfo(user)||{}).name || '';
 function grantKidLabel(user){
@@ -10335,7 +10603,8 @@ function grantKidLabel(user){
   const bd=same ? fmtBirthday(i.bday, PL()==='de') : '';
   return bd ? i.name+', '+bd : i.name;
 }
-const kidChipLabel = user => { const n=grantKidLabel(user); return n && n!==user ? `${n} (${user})` : user; };
+/* task "Schule und Klasse" (Peter, 05.11.): with a grant also the class and school the family entered (list and header) */
+const kidChipLabel = user => { const n=grantKidLabel(user), s=schoolText((grantKidInfo(user)||{}).school, PL()==='de', false), l=n && n!==user ? `${n} (${user})` : user; return s ? l+' · '+s : l; };
 /* Header of the grown-ups area: only what the user needs (Peter, 31.10.: no processing notes here;
    how log-out works belongs to the guide). */
 function parentHeaderHTML(){
@@ -10433,35 +10702,35 @@ const HELP={
   sheet:{kid:true,title:'Practice sheet',text:'<p>A sheet with 6 tasks and a writing task, plus an answer page for grown-ups.</p><p>Share it as a PDF (by mail, message or into Files) or print it. When you are done on paper, tap your sheet under “My sheets” and type in your answers.</p>'},
   gaps:{title:'Lücken laut Schule',text:'<p>Hat die Schule einen Standard mit „Requires support“ oder „Consolidating“ eingestuft, übt die App ihn als <b>Lücke</b>. Immer eine zur Zeit, höchstens 2 von 8 Aufgaben pro Runde. Lücken, die ohnehin aktuelles Thema sind, werden übersprungen.</p><p>Geschlossen ist eine Lücke, wenn eine ihrer Quests in der App <b>bestätigt sicher</b> ist. Das heißt: sicher bei den Antworten in der App. Wer geantwortet hat und mit welchen Hilfsmitteln, weiß die App nicht; ob die Aufgaben den Standard so abdecken, wie die Schule ihn prüft, ist je Thema verschieden.</p><p>Sie entscheiden: <b>Jetzt angehen</b>, <b>Als geschlossen markieren</b> oder – nach dem Schließen durch die App – <b>Weiter üben</b>.</p>'},
   overview:{title:'Wie entsteht die Einschätzung?',text:'<p>Gezählt wird nur der <b>erste Versuch</b> jeder Aufgabe: selbst gelöst, mit Hinweis oder Lösungsweg angesehen. Eine Einschätzung gibt es erst ab <b>8 Aufgaben an 3 Tagen</b> – vorher „Noch nicht einschätzbar“, das sagt nichts Schlechtes.</p><ul><li><b>Vorläufig:</b> eine erste Einschätzung.</li><li><b>Bestätigt:</b> nach etwa 20 Aufgaben an 5 Übungstagen.</li><li><b>Tendenz:</b> nur, wenn zwei Zeiträume genug Aufgaben haben.</li><li><b>Ältere Belege:</b> nach mehr als 3 Wochen Pause – Ferien sind kein Leistungsabfall.</li></ul><p>Das ist <b>keine schulische Bewertung</b> und wird dem Kind nie gezeigt.</p><p>Die App weiß nicht, wer eine Aufgabe gelöst hat und mit welchen Hilfsmitteln. Die Einschätzung ist ein Hinweis; die Verantwortung liegt bei den Eltern.</p>'},
-  focusmode:{title:'Fokus: Automatisch oder Manuell',text:'<p><b>Automatisch:</b> Die App wählt selbst und passt sich von selbst an:</p><ul><li>die nächsten Schritte, die die Lehrkraft nennt,</li><li>was laut Einschätzung Unterstützung braucht,</li><li>die aktive Lücke laut Schule.</li></ul><p>Tippen Sie bei einer Quest auf „Im Fokus“, wechselt die Wahl auf „Manuell“.</p><p><b>Manuell:</b> Sie legen selbst fest, woraus „Practise Today“ und das Übungsblatt Aufgaben nehmen – zum Beispiel vor einem Test. Mit „Automatisch“ übernimmt wieder die App.</p><p>Alle Quests bleiben für das Kind spielbar; der Fokus bestimmt nur, was „Practise Today“ und das Übungsblatt bevorzugen. Mehr dazu in „📖 So funktioniert Big Quest → Wie die App einstuft“.</p>'},
+  focusmode:{title:'Fokus: Automatisch oder Manuell',text:'<p><b>Automatisch:</b> Die App wählt selbst und passt sich von selbst an:</p><ul><li>die nächsten Schritte, die die Lehrkraft nennt,</li><li>was laut Einschätzung Unterstützung braucht,</li><li>die aktive Lücke laut Schule.</li></ul><p>Tippen Sie bei einer Quest auf „Im Fokus“, wechselt die Wahl auf „Manuell“.</p><p><b>Manuell:</b> Sie legen selbst fest, woraus „Practise Today“ und das Übungsblatt Aufgaben nehmen – zum Beispiel vor einem Test. Mit „Automatisch“ übernimmt wieder die App.</p><p>Alle Quests bleiben für das Kind spielbar; der Fokus bestimmt nur, was „Practise Today“ und das Übungsblatt bevorzugen. Mehr dazu in „📖 Das Konzept von Big Quest → Wie die App einstuft“.</p>'},
   focus:{title:'Fokus-Themen',text:'<p>Aus diesen Themen stellt „Practise Today“ die 8 Aufgaben zusammen; auch die Übungsblätter nutzen sie. Auf der Startseite tragen sie das Zeichen „Focus“.</p><p>Die App wählt sie selbst: die nächsten Schritte der Lehrkraft, Quests, bei denen Übung hilft, und die aktive Lücke. Unter „🎯 Fokus“ können Sie auf „Manuell“ umstellen und selbst wählen.</p>'},
-  school:{title:'Einstufungen der Schule',text:'<p>Die Einstufungen stammen aus den bewerteten Aufgaben auf der Lernplattform der Schule. Am Anfang richtet die App die Schwierigkeit der Aufgaben danach aus. Ab 6 Antworten an 2 Tagen zählt die eigene Übung.</p><p>Die Einschätzung im Elternbereich beruht nur auf der Übung in der App. Neue Bewertungen der Schule werden bei Gelegenheit übernommen.</p>'},
+  school:{title:'Schulische Einstufungen',text:'<p>Eine Zeile je bewerteter Aufgabe. Filtern Sie nach Fach, Zeitraum oder nur „Braucht Unterstützung“ und „Wird sicherer“; sortieren Sie nach Datum, Fach oder Einstufung. „Details“ zeigt immer gleich gegliedert: Standards, Bewertungsraster (Lehrkraft und Selbsteinschätzung Ihres Kindes), Stärken und nächste Schritte.</p><p>„Stand der Daten“ ist der Tag, an dem die Bewertungen von der Lernplattform übernommen wurden.</p><p>Die Einstufungen stammen aus den bewerteten Aufgaben auf der Lernplattform der Schule. Am Anfang richtet die App die Schwierigkeit der Aufgaben danach aus. Ab 6 Antworten an 2 Tagen zählt die eigene Übung.</p><p>Die Einschätzung im Elternbereich beruht nur auf der Übung in der App. Neue Bewertungen der Schule werden bei Gelegenheit übernommen.</p>'},
   calendar:{title:'Kalender-Erinnerung',text:'<p>Freiwillig: erzeugt eine Kalenderdatei mit einer wiederkehrenden, freundlichen Einladung zum Üben. Die App selbst schickt keine Nachrichten.</p>'},
   storycap:{title:'Pisolala-Geschichten',text:'<p>Hier legen Sie fest, wie spannend eine Geschichte höchstens sein darf. Das Kind wählt selbst bis zu dieser Grenze. Jede Stufe bleibt freundlich.</p>'},
   profile:{title:'Profilangaben',text:'<p>Vorname, Nachname, Geburtstag (Jahr freiwillig) und Emoji. Das Kind trägt sie unter „My profile“ ein, Sie können Name und Geburtstag hier ergänzen oder ändern. Name und Geburtsdatum sieht eine Lehrkraft nur mit Ihrer Freigabe – so kann sie Kinder mit gleichem Vornamen unterscheiden. Die Angaben liegen nur auf diesem Gerät. Löschen entfernt nur diese Angaben, keine Lerndaten.</p>'},
   version:{title:'App-Version',text:'<p>Zeigt den Stand der App auf diesem Gerät. Die App aktualisiert sich beim Start und beim Zurückkehren selbst. „Nach neuer Version suchen“ vergleicht mit der veröffentlichten Seite.</p>'},
     sheets:{title:'Übungsblätter',text:'<p>Ihr Kind trägt seine Antworten vom Papier selbst ein: Startseite → „My sheets“. Die App prüft wie gewohnt, mit Tipp und zweitem Versuch.</p><p>Hier sehen Sie je Aufgabe „Richtig“, „Mit Hilfe“ oder „Noch nicht“. „Mit Hilfe“ und „Noch nicht“ sind gut so: Die App bietet dann leichtere Schritte an und wiederholt die Aufgabe später. Ein Blatt, das nicht eingetragen wird, zählt einfach nicht.</p>'},
   testday:{noGuide:true,title:'Testkonto: +1 Tag',text:'<p><b>+1 Tag</b> stellt die Uhr der App nur für dieses Testkonto einen Tag vor. So sehen Sie sofort, was sonst erst morgen passiert:</p><ul><li>Fehler kommen als Wiederholung zurück.</li><li>Der Lernbaum wächst.</li><li>Die Einschätzung im Elternbereich sammelt Übungstage.</li></ul><p>Die Daten des Kindes bleiben unberührt. <b>Testdaten löschen</b> setzt das Testkonto ganz zurück (auch den Tag).</p>'},
-  guidance:{title:'Ihr Kind unterstützen',text:'<p>Ein Vorschlag, wie oft geübt wird, und die wichtigsten Regeln. Konkretes zu jedem Thema steht bei jeder Quest unter „💡 So helfen Sie“.</p>'},
-  abgleich:{noGuide:true,title:'Abgleich',text:'<p>Die App gleicht von selbst ab – Sie müssen nichts tippen: beim Öffnen, beim Zurückkehren, alle 30 Sekunden, solange sie offen ist, und kurz nach neuen Einträgen. Beim Wechsel in eine andere App schickt sie noch, was offen ist.</p><ul><li><b>Kein Netz:</b> Alles bleibt auf dem Gerät und wird später nachgeholt. Es geht nichts verloren.</li><li><b>Mitten in einer Runde</b> ändert sich beim Kind nichts; Neues erscheint nach der Runde.</li><li><b>Nicht übernommen:</b> Einträge, die die App abgelehnt hat – etwa von einem entfernten Gerät oder ohne passende Unterschrift. Ihre Daten bleiben davon unberührt. Steigt die Zahl unerwartet, bitte den Admin fragen.</li></ul><p>Das Kind sieht vom Abgleich nichts.</p>'}
+  guidance:{title:'So unterstützen Sie Ihr Kind',text:'<p>Ein Vorschlag, wie oft geübt wird, und die wichtigsten Regeln. Konkretes zu jedem Thema steht bei jeder Quest unter „💡 So helfen Sie“.</p>'},
+  abgleich:{noGuide:true,title:'Abgleich',text:'<p>Die App gleicht von selbst ab – Sie müssen nichts tippen: beim Öffnen, beim Zurückkehren, alle 30 Sekunden, solange sie offen ist, und kurz nach neuen Einträgen. Beim Wechsel in eine andere App schickt sie noch, was offen ist.</p><ul><li><b>Kein Netz:</b> Alles bleibt auf dem Gerät und wird später nachgeholt. Es geht nichts verloren.</li><li><b>Mitten in einer Runde</b> ändert sich beim Kind nichts; Neues erscheint nach der Runde.</li><li><b>Nicht übernommen:</b> Einträge, die die App abgelehnt hat, weil sie gefälscht waren oder ohne Berechtigung kamen – etwa von einem entfernten Gerät. Harmloses aus der Reihenfolge der Geräte zählt nicht mit. Ihre Daten bleiben davon unberührt. Steigt die Zahl unerwartet, bitte den Admin fragen.</li></ul><p>Das Kind sieht vom Abgleich nichts.</p>'}
 };
 /* Grown-ups help in English: meaning-based, American English (Peter, 31.10.). */
 const HELP_EN={
   gaps:{title:'Gaps per school',text:'<p>When the school rated a standard “requires support” or “consolidating”, the app practices it as a <b>gap</b>. One at a time, at most 2 of 8 tasks per round. Gaps that are a current topic anyway are skipped.</p><p>A gap is closed when one of its quests is <b>confirmed secure</b> in the app. That means: secure in the answers in the app. The app does not know who answered or with what help; whether the tasks cover the standard the way the school tests it differs from topic to topic.</p><p>You decide: <b>Work on it now</b>, <b>Mark as closed</b> or – after the app closed it – <b>Keep practicing</b>.</p>'},
   overview:{title:'How is the summary made?',text:'<p>Only the <b>first try</b> at each task counts: solved on their own, with a hint, or after viewing the solution. A judgment appears only after <b>8 tasks on 3 days</b>. Until then it says “not yet possible to judge” – that says nothing bad.</p><ul><li><b>Provisional:</b> a first judgment.</li><li><b>Confirmed:</b> after about 20 tasks on 5 practice days.</li><li><b>Trend:</b> only when two periods have enough tasks.</li><li><b>Older evidence:</b> after a break of more than 3 weeks – vacations are not a drop in ability.</li></ul><p>This is <b>not a school assessment</b> and is never shown to your child.</p><p>The app does not know who solved a task or with what help. The summary is a hint; responsibility lies with the parents.</p>'},
-  focusmode:{title:'Focus: automatic or manual',text:'<p><b>Automatic:</b> the app chooses by itself and adapts by itself:</p><ul><li>the next steps the teacher names,</li><li>what needs support according to the summary,</li><li>the active gap per school.</li></ul><p>Tapping “In focus” at a quest switches to “Manual”.</p><p><b>Manual:</b> you decide where “Practise Today” and the practice sheet take their tasks from – for example before a test. Choose “Automatic” to let the app take over again.</p><p>All quests stay playable for your child; the focus only decides what “Practise Today” and the practice sheet prefer. More in “📖 How Big Quest works → How the app judges”.</p>'},
+  focusmode:{title:'Focus: automatic or manual',text:'<p><b>Automatic:</b> the app chooses by itself and adapts by itself:</p><ul><li>the next steps the teacher names,</li><li>what needs support according to the summary,</li><li>the active gap per school.</li></ul><p>Tapping “In focus” at a quest switches to “Manual”.</p><p><b>Manual:</b> you decide where “Practise Today” and the practice sheet take their tasks from – for example before a test. Choose “Automatic” to let the app take over again.</p><p>All quests stay playable for your child; the focus only decides what “Practise Today” and the practice sheet prefer. More in “📖 The Big Quest concept → How the app judges”.</p>'},
   focus:{title:'Focus topics',text:'<p>“Practise Today” builds its 8 tasks from these topics; practice sheets use them too. On the start page they carry the “Focus” sign.</p><p>The app picks them by itself: the teacher’s next steps, quests where practice helps, and the active gap. Under “🎯 Focus” you can switch to “Manual” and choose yourself.</p>'},
-  school:{title:'School ratings',text:'<p>The ratings come from the evaluated assignments on the school’s learning platform. At first, the app sets the difficulty of the tasks by them. From 6 answers on 2 days, your child’s own practice counts.</p><p>The summary in the grown-ups area is based only on practice in the app. New school evaluations are added from time to time.</p>'},
+  school:{title:'School assessments',text:'<p>One row per evaluated assignment. Filter by subject, period or only “Needs support” and “Getting there”; sort by date, subject or rating. “Details” always has the same outline: standards, rubric (the teacher’s and your child’s own rating), strengths and next steps.</p><p>“Data as of” is the day the evaluations were taken from the learning platform.</p><p>The assessments come from the evaluated assignments on the school’s learning platform. At first, the app sets the difficulty of the tasks by them. From 6 answers on 2 days, your child’s own practice counts.</p><p>The summary in the grown-ups area is based only on practice in the app. New school evaluations are added from time to time.</p>'},
   calendar:{title:'Calendar reminder',text:'<p>Optional: creates a calendar file with a recurring, friendly invitation to practice. The app itself never sends messages.</p>'},
   storycap:{title:'Pisolala stories',text:'<p>Set how exciting a story may be at most. Your child chooses up to this limit. Every level stays kind.</p>'},
   profile:{title:'Profile details',text:'<p>First name, last name, birthday (year optional) and emoji. Your child enters them under “My profile”; you can add or change the name and birthday here. A teacher sees the name and date of birth only with your grant – so she can tell children with the same first name apart. Stored only on this device. Deleting removes only these details, no learning data.</p>'},
   version:{title:'App version',text:'<p>Shows the version on this device. The app updates itself when it starts and when you come back to it. “Check for a new version” compares it with the published page.</p>'},
     sheets:{title:'Practice sheets',text:'<p>Your child types in the answers from the paper: start page → “My sheets”. The app checks them as usual, with a tip and a second try.</p><p>Here you see “Correct”, “With help” or “Not yet” for each task. “With help” and “Not yet” are fine: the app then offers easier steps and brings the task back later. A sheet that isn’t entered simply doesn’t count.</p>'},
   testday:{title:'Test account: +1 day',text:'<p><b>+1 day</b> moves the app’s clock one day ahead, for this test account only. You see right away what would otherwise happen tomorrow:</p><ul><li>Mistakes come back as reviews.</li><li>The learning tree grows.</li><li>The summary in the grown-ups area collects practice days.</li></ul><p>Your child’s data is not touched. <b>Delete test data</b> resets the test account completely (including the day).</p>'},
-  guidance:{title:'Supporting your child',text:'<p>A suggestion for how often to practice, and the key rules. Concrete help for each topic is at every quest under “💡 How you can help”.</p>'},
-  abgleich:{title:'Sync',text:'<p>The app syncs by itself – you don’t need to tap anything: when it opens, when you come back, every 30 seconds while it is open, and shortly after new entries. When you switch to another app, it sends whatever is still open.</p><ul><li><b>No connection:</b> everything stays on the device and is caught up later. Nothing gets lost.</li><li><b>In the middle of a round</b> nothing changes for your child; new things appear after the round.</li><li><b>Not taken over:</b> entries the app refused – for example from a removed device or without a matching signature. Your data is not affected. If the number grows unexpectedly, please ask the admin.</li></ul><p>Your child sees nothing of the sync.</p>'}
+  guidance:{title:'How to support your child',text:'<p>A suggestion for how often to practice, and the key rules. Concrete help for each topic is at every quest under “💡 How you can help”.</p>'},
+  abgleich:{title:'Sync',text:'<p>The app syncs by itself – you don’t need to tap anything: when it opens, when you come back, every 30 seconds while it is open, and shortly after new entries. When you switch to another app, it sends whatever is still open.</p><ul><li><b>No connection:</b> everything stays on the device and is caught up later. Nothing gets lost.</li><li><b>In the middle of a round</b> nothing changes for your child; new things appear after the round.</li><li><b>Not taken over:</b> entries the app refused because they were forged or came without permission – for example from a removed device. Harmless things from the order of the devices do not count. Your data is not affected. If the number grows unexpectedly, please ask the admin.</li></ul><p>Your child sees nothing of the sync.</p>'}
 };
-const ADULT_H2=[['Einstufungen der Schule','school'],['School ratings','school'],['Einschätzung','overview'],['Summary','overview'],['Pisolala','storycap'],['Freiwillige Kalender','calendar'],['Optional calendar','calendar'],['Profilangaben','profile'],['Profile details','profile'],['App-Version','version'],['App version','version'],['Übungsblätter','sheets'],['Practice sheets','sheets'],['So unterstützen','guidance'],['Supporting','guidance']];
+const ADULT_H2=[['Schulische Einstufungen','school'],['School assessments','school'],['Einschätzung','overview'],['Summary','overview'],['Pisolala','storycap'],['Freiwillige Kalender','calendar'],['Optional calendar','calendar'],['Profilangaben','profile'],['Profile details','profile'],['App-Version','version'],['App version','version'],['Übungsblätter','sheets'],['Practice sheets','sheets'],['So unterstützen','guidance'],['How to support','guidance']];
 function addAdultInfo(root){ root.querySelectorAll('h2').forEach(h=>{ const m=ADULT_H2.find(([t])=>h.textContent.trim().startsWith(t)); if(m && !h.querySelector('.info-btn')) h.insertAdjacentHTML('beforeend',` <button type="button" class="info-btn" data-help="${m[1]}" aria-label="Info">ⓘ</button>`); }); }
 function openHelp(key){
   const base=HELP[key]; if(!base) return;
@@ -10598,7 +10867,7 @@ function kontoZugang(){
 /* test instance: the access key of the test storage, once per device (concept 12; shared login page, US English) */
 function kontoTokenHTML(){
   if(!anmTokenNoetig(KONTO_SPEICHER, localStorage)) return '';
-  return `<details class="login-help" id="kontoTokenBox" open><summary>🔑 Test storage</summary><p>This test version keeps its data in a private test storage. Enter the access key from the admin once on this device.</p><form id="kontoTokenForm" class="login-form"><div class="field"><label for="kontoToken">Access key</label><input id="kontoToken" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required></div><button class="btn" id="kontoTokenGo" type="submit">Save</button><p id="kontoTokenMsg" class="small" role="status"></p></form></details>`;
+  return `<details class="login-help" id="kontoTokenBox" open><summary>🔑 Storage access</summary><p>This app keeps its data in a private storage. Enter the access key from the admin once on this device.</p><form id="kontoTokenForm" class="login-form"><div class="field"><label for="kontoToken">Access key</label><input id="kontoToken" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required></div><button class="btn" id="kontoTokenGo" type="submit">Save</button><p id="kontoTokenMsg" class="small" role="status"></p></form></details>`;
 }
 function kontoTokenVerbinden(){
   const f=$('#loginBody').querySelector('#kontoTokenForm'); if(!f) return;
@@ -10813,6 +11082,7 @@ function kontoGeraetName(){
 /* one sync at a time; a call during a running one asks for one more round and gets the running one */
 function kontoAbgleich(){
   if(!KONTO_UI || !kontoOffen.size || !kontoZugang()) return Promise.resolve(null);
+  if(kontoLoeschtGerade) return Promise.resolve(null);                                   // a deletion is running (it syncs itself)
   if(Date.now()<kontoStatus.wartenBis){ kontoPlanen(); return Promise.resolve(null); }   // hourly limit: wait, do not ask again
   if(kontoLauf){ kontoNochmal=true; return kontoLauf; }
   const p=kontoAbgleichLauf(); kontoLauf=p;
@@ -10900,8 +11170,26 @@ function kontoNachAbgleich(r, vorher){
     : (de?`⚠️ Die Einladung für ${nameVon(w.id)} wurde nicht mit dem richtigen Schlüssel eingelöst. Es wurde nichts übernommen. Bitte die Einladung zurückziehen und neu einladen.`:`⚠️ The invitation for ${nameVon(w.id)} was not used with the right key. Nothing was taken over. Please withdraw it and invite again.`));
   for(const id of r.abgelaufen) melde('x:'+id, 'info', de?`Die Einladung für ${nameVon(id)} ist abgelaufen.`:`The invitation for ${nameVon(id)} has expired.`);
   for(const x of r.erneuert) melde('e:'+x.person+':'+x.fingerabdruck, 'info', de?`ℹ️ ${x.name||'Der andere Elternteil'} hat einen neuen Schlüssel. Prüfwörter: ${x.fingerabdruck}`:`ℹ️ ${x.name||'The other parent'} has a new key. Check words: ${x.fingerabdruck}`);
+  // task "Familienfassung bauen": a child deleted by a parent (its data already left this device - module einladung) and
+  // accounts no longer in the storage: off this device too (list, key copy, session, recordings); whoever of them is
+  // logged in here now is logged out
+  // An account deleted on another device that this device already knew: the module reports its areas as gone (fehler
+  // "geloescht") - a grown-up's own area, a child's learning area, the family area (the last parent deleted his account
+  // before this device read that the children were taken out). Their data leave this device as well.
+  const b=(r.bericht && r.bericht.bereiche)||{}, gone=a=>!!(b[a] && b[a].fehler==='geloescht'), still=!kontoInRunde();
+  const kontoWeg=still ? [...kontoOffen.keys()].filter(id=>kontoOffen.get(id).art!=='child' && gone('person:'+id)) : [];
+  const kindWeg=still ? Object.keys(b).filter(a=>a.startsWith('kind:lern:') && gone(a)).map(a=>a.slice(10)) : [];
+  for(const kid of kindWeg) try{ anmKindLokalEntfernen({ablage:localStorage, kind:kid}); }catch(e){ kontoFehlerListe.push('entfernen: '+String(e&&e.message||e)); }
+  for(const f of still ? Object.keys(b).filter(a=>a.startsWith('familie:') && gone(a)).map(a=>a.slice(8)) : []) kontoFamilieWeg(f);
+  const weg=[...new Set([...(r.geloescht||[]), ...(r.kontoGeloescht||[]), ...kindWeg, ...kontoWeg])];
+  for(const id of weg){ const a=accByRef({id}); if(a && a.role==='student' && !kontoWeg.includes(id) && !(r.kontoGeloescht||[]).includes(id)) melde('d:'+id, 'info', de?`ℹ️ ${kontoKindName(id, a.user)} wurde gelöscht.`:`ℹ️ ${kontoKindName(id, a.user)} was deleted.`); kontoLokalWeg(id); }
   const vorherKinder=kontoKinderText();
   kontoKontenAuffrischen();
+  if(weg.length){
+    evNeuLaden();
+    if(parentAccess && adultUser && !accByRef({user:adultUser.user})){ parentAbmelden(); return; }
+    if(!parentAccess && !studentSession() && state.screen!=='login'){ showLogin(); return; }
+  }
   kontoNeuZeichnen(neu>0 || r.inDieApp>0 || vorherKinder!==kontoKinderText());
 }
 /* the accounts of the app: those that logged in here, and the children of the parents logged in here (from the family's
@@ -11028,10 +11316,11 @@ function kontoFamilieHTML(){
   const msgs=kontoMeldungen.slice(-6).map(m=>`<p class="kmeld kmeld-${m.art}">${esc(m.text)}</p>`).join('');
   return msgs
     +`<h3 class="psub">${de?'Kinder':'Children'}</h3>`
-    +(kinder.length?`<ul class="klist">${kinder.map(c=>`<li>👧 <b>${esc(kontoKindName(c.id, c.name))}</b> <span class="small">(${esc(c.name)})</span> <button type="button" class="btn small" data-kneu="${esc(c.id)}">🔑 ${de?'Neues Passwort':'New password'}</button></li>`).join('')}</ul>`:`<p class="small">${de?'Noch kein Kind angelegt.':'No child added yet.'}</p>`)
+    +(kinder.length?`<ul class="klist">${kinder.map(c=>`<li>👧 <b>${esc(kontoKindName(c.id, c.name))}</b> <span class="small">(${esc(c.name)})</span> <button type="button" class="btn small" data-kneu="${esc(c.id)}">🔑 ${de?'Neues Passwort':'New password'}</button> <button type="button" class="btn small" data-kexport="${esc(c.id)}">📄 ${de?'Daten':'Data'}</button> <button type="button" class="btn small" data-kloesch="${esc(c.id)}">🗑️ ${de?'Löschen':'Delete'}</button></li>`).join('')}</ul>`:`<p class="small">${de?'Noch kein Kind angelegt.':'No child added yet.'}</p>`)
     +`<p><button type="button" class="btn" id="kKindAnlegen">➕ ${de?'Kind anlegen':'Add a child'}</button></p>`
     +(v.eltern.length<2 && !v.offen.some(o=>o.art==='parent') ? `<p><button type="button" class="btn" id="kElternEinladen">➕ ${de?'Zweiten Elternteil einladen':'Invite the second parent'}</button></p>` : '')
-    +(v.offen.length?`<h3 class="psub">${de?'Offene Einladungen':'Open invitations'}</h3><ul class="klist">${v.offen.map(o=>`<li>${warn.has(o.invite)?'⚠️ ':''}${esc(o.display||o.name)} – ${artText(o.art)}, ${de?'gültig bis':'valid until'} ${esc(kontoZeit(o.until))} <button type="button" class="btn small" data-kzurueck="${esc(o.invite)}">${de?'Zurückziehen':'Withdraw'}</button></li>`).join('')}</ul>`:'');
+    +(v.offen.length?`<h3 class="psub">${de?'Offene Einladungen':'Open invitations'}</h3><ul class="klist">${v.offen.map(o=>`<li>${warn.has(o.invite)?'⚠️ ':''}${esc(o.display||o.name)} – ${artText(o.art)}, ${de?'gültig bis':'valid until'} ${esc(kontoZeit(o.until))} <button type="button" class="btn small" data-kzurueck="${esc(o.invite)}">${de?'Zurückziehen':'Withdraw'}</button></li>`).join('')}</ul>`:'')
+    +`<h3 class="psub">${de?'Mein Konto löschen':'Delete my account'}</h3><p><button type="button" class="btn small" id="kKontoLoeschen">🗑️ ${de?'Mein Konto löschen':'Delete my account'}</button></p>`;
 }
 function kontoGeraeteHTML(){
   const de=PL()==='de', k=kontoIch(); if(!k) return '';
@@ -11065,6 +11354,10 @@ function kontoBlattHTML(){
     return back+`<h2 class="psubjtitle">🔑 ${b.geraet?(de?'Eigenes Gerät entfernen':'Remove own device'):(de?'Schlüssel erneuern':'Renew key')}</h2><p class="small">${b.geraet?(de?`„${esc(b.gname)}“ wird entfernt. Damit es nichts Neues mehr lesen kann, bekommen Sie dabei einen neuen Schlüssel.`:`“${esc(b.gname)}” is removed. So that it cannot read anything new, you get a new key with it.`):''} ${de?'Sie wählen ein neues Passwort und bekommen einen neuen Wiederherstellungscode. Auf Ihren anderen Geräten melden Sie sich danach mit dem neuen Passwort neu an – bis dahin sehen sie nichts Neues.':'You choose a new password and get a new recovery code. Then log in again with the new password on your other devices – until then they see nothing new.'}</p><form id="kErnForm" class="login-form"><input class="sr" type="text" name="username" autocomplete="username" value="${esc(adultUser?adultUser.user:'')}" readonly tabindex="-1" aria-hidden="true"><div class="field"><label for="kErnAlt">${de?'Aktuelles Passwort':'Current password'}</label><input id="kErnAlt" type="password" autocomplete="current-password" required></div><p class="pw-suggest">${de?'Vorschlag':'Suggestion'}: <b id="kErnSugg">${esc(sugg)}</b> <button type="button" class="btn small" id="kErnUse">${de?'Übernehmen':'Use it'}</button> <button type="button" class="btn small" id="kErnAnother">${de?'Anderer Vorschlag':'Another one'}</button></p><div class="field"><label for="kErnNeu1">${de?'Neues Passwort':'New password'}</label><input id="kErnNeu1" type="password" autocomplete="new-password" required></div><div class="field"><label for="kErnNeu2">${de?'Passwort wiederholen':'Repeat password'}</label><input id="kErnNeu2" type="password" autocomplete="new-password" required></div><button class="btn primary" id="kErnGo" type="submit">${b.geraet?(de?'Entfernen und Schlüssel erneuern':'Remove and renew key'):(de?'Schlüssel erneuern':'Renew key')}</button>${msg}</form>`;
   }
   if(b.art==='code') return `<div id="kCodeBox"></div>`;
+  // task "Familienfassung bauen": export and deletion (module kinddaten; concept 13, US12.1/12.2)
+  if(b.art==='export') return back+`<h2 class="psubjtitle">📄 ${de?`Daten von ${esc(b.name)}`:`Data of ${esc(b.name)}`}</h2><p class="small">${de?`Alles, was zu ${esc(b.name)} gespeichert ist – Stand nach dem letzten Abgleich. Die lesbare Seite öffnet jeder Browser; die Datei enthält dasselbe für Programme.`:`Everything stored about ${esc(b.name)} – as of the last sync. Any browser opens the readable page; the file holds the same for programs.`}</p><p><button type="button" class="btn primary" id="kExHtml">📄 ${de?'Lesbare Seite sichern':'Save readable page'}</button> <button type="button" class="btn" id="kExJson">🗂️ ${de?'Datei (JSON) sichern':'Save file (JSON)'}</button></p>${msg}`;
+  if(b.art==='loeschkind') return back+`<h2 class="psubjtitle">🗑️ ${de?`${esc(b.name)} löschen`:`Delete ${esc(b.name)}`}</h2><p>${de?`Gelöscht wird alles von ${esc(b.name)}: Lernstand, Profil, Schulbewertungen, Freigaben, Geräte und Leseaufnahmen – im Speicher und auf diesem Gerät. Die anderen Geräte räumen beim nächsten Abgleich auf; ${esc(b.name)} kann sich danach nicht mehr anmelden. Das lässt sich nicht rückgängig machen.`:`Everything of ${esc(b.name)} is deleted: progress, profile, school ratings, grants, devices and recordings – in the storage and on this device. The other devices clean up with their next sync; ${esc(b.name)} can no longer log in. This cannot be undone.`}</p><p class="small">${de?'Tipp: vorher „📄 Daten“ sichern.':'Tip: save “📄 Data” first.'}</p><form id="kLoeschForm" class="login-form"><div class="field"><label for="kLoeschName">${de?`Zur Bestätigung den Anmeldenamen eintippen: <b>${esc(b.login)}</b>`:`To confirm, type the login name: <b>${esc(b.login)}</b>`}</label><input id="kLoeschName" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required></div><button class="btn primary" id="kLoeschGo" type="submit">${de?'Endgültig löschen':'Delete for good'}</button>${msg}</form>`;
+  if(b.art==='loeschkonto') return back+`<h2 class="psubjtitle">🗑️ ${de?'Mein Konto löschen':'Delete my account'}</h2><p>${b.letzter?(de?'Sie sind der einzige Elternteil. Gelöscht werden Ihr Konto, die Familie und jedes Kind mit allen Daten – im Speicher und auf diesem Gerät.':'You are the only parent. Your account, the family and every child with all data are deleted – in the storage and on this device.'):(de?'Sie verlassen die Familie, Ihr Konto wird gelöscht. Die Kinder bleiben beim anderen Elternteil.':'You leave the family and your account is deleted. The children stay with the other parent.')} ${de?'Das lässt sich nicht rückgängig machen.':'This cannot be undone.'}</p>${b.letzter?`<p class="small">${de?'Tipp: vorher je Kind „📄 Daten“ sichern.':'Tip: save “📄 Data” of each child first.'}</p>`:''}<form id="kKlForm" class="login-form"><input class="sr" type="text" name="username" autocomplete="username" value="${esc(adultUser?adultUser.user:'')}" readonly tabindex="-1" aria-hidden="true"><div class="field"><label for="kKlPw">${de?'Ihr Passwort':'Your password'}</label><input id="kKlPw" type="password" autocomplete="current-password" required></div><button class="btn primary" id="kKlGo" type="submit">${de?'Endgültig löschen':'Delete for good'}</button>${msg}</form>`;
   if(b.art==='token') return back+`<h2 class="psubjtitle">🔑 ${de?'Neuer Zugangsschlüssel':'New access key'}</h2><p class="small">${de?'Den Schlüssel bekommen Sie vom Admin. Er gilt für dieses Gerät; Ihre Daten bleiben, wie sie sind.':'You get the key from the admin. It is for this device; your data stays as it is.'}</p><form id="kTokenForm" class="login-form"><div class="field"><label for="kTokenNeuWert">${de?'Zugangsschlüssel':'Access key'}</label><input id="kTokenNeuWert" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required></div><button class="btn primary" id="kTokenGo" type="submit">${de?'Speichern':'Save'}</button>${msg}</form>`;
   return back;
 }
@@ -11098,6 +11391,7 @@ function kontoFehler(err){
   if(c==='anmeldung') return de?'Das aktuelle Passwort stimmt nicht.':'The current password is not right.';
   if(c==='passwort-gleich') return de?'Das neue Passwort muss sich vom aktuellen unterscheiden.':'The new password must differ from the current one.';
   if(c==='passwort-schwach') return pwStrongText(true);
+  if(c==='nicht-gesendet') return de?'Ohne Verbindung zum Speicher wurde nichts gelöscht. Bitte mit Netz erneut versuchen.':'Without a connection to the storage nothing was deleted. Please try again with a connection.';
   if(c==='nicht-erlaubt' || c==='geraet-unbekannt' || c==='kind-unbekannt') return de?'Das geht hier nicht (mehr). Bitte die Seite neu öffnen.':'This is not possible (any more). Please open the page again.';
   return loginTxt(true).noStore;
 }
@@ -11127,6 +11421,62 @@ function kontoKindNeuStarten(kind){
   const k=kontoIch(), c=k && kontoVerb(k).kinder.find(x=>x.id===kind); if(!c) return;
   return kontoSchritt(null, ()=>kontoEinladen((z,me)=>anmKindNeu({zugang:z, ablage:localStorage, konto:me, kind, now:Date.now()}), {zweck:'neu', name:kontoKindName(c.id, c.name)}));
 }
+/* ---------- export and deletion (task "Familienfassung bauen"; module kinddaten via anmeldung) ---------- */
+/* export: sync first (the newest state of every device), then all data of the child as a readable page and a file */
+function kontoExport(kind){
+  const k=kontoIch(), c=k && kontoVerb(k).kinder.find(x=>x.id===kind); if(!c) return;
+  return kontoSchritt(null, async()=>{
+    await kontoAbgleich();
+    const r=await anmKindExport({ablage:localStorage, konto:kontoIch(), kind, now:Date.now(), heute:dayKey(), sprache:PL()==='de'?'de':'en'});
+    kontoBlattZeigen({art:'export', kind, name:kontoKindName(c.id, c.name), html:r.html, json:r.json, dateiname:r.dateiname});
+  });
+}
+/* a file to the share menu (iPad: "Save to Files") or, without it, as a download */
+async function kontoDateiSichern(text, name, type, de, msg){
+  const file=new File([text], name, {type});
+  if(navigator.canShare && navigator.share && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file], title:name}); if(msg) msg.textContent=de?'Datei geteilt.':'File shared.'; return; }catch(e){ if(e && e.name==='AbortError'){ if(msg) msg.textContent=''; return; } }
+  }
+  const x=document.createElement('a'); x.href=URL.createObjectURL(file); x.download=name; document.body.appendChild(x); x.click(); x.remove(); setTimeout(()=>URL.revokeObjectURL(x.href),5000);
+  if(msg) msg.textContent=(de?'Datei gespeichert (Downloads): ':'File saved (downloads): ')+name;
+}
+/* deleting never runs next to a sync (both write the device state of the areas): no new sync from now, the running one
+   ends first */
+let kontoLoeschtGerade=false;
+async function kontoLoeschenLauf(tun){
+  kontoLoeschtGerade=true;
+  try{ if(kontoLauf) await kontoLauf; return await tun(); }
+  finally{ kontoLoeschtGerade=false; }
+}
+/* an account deleted (here or - learned with the sync - on another device) leaves this device: its line in the device
+   list, its key copy, its sessions, its data and - for a child - its recordings (IndexedDB; module kinddaten cannot reach
+   them). familie: the family area that went with it (the last parent deleted his account) */
+function kontoLokalWeg(id, familie){
+  if(!id) return;
+  try{ localStorage.setItem('bqt_kontoListe', JSON.stringify(kontoListe().filter(e=>e.id!==id))); }catch(e){}
+  kontoAbmelden(id);
+  const s=store.get('session',null); if(s && s.id===id) store.del('session');
+  const sp=store.get('sessionPrev',null); if(sp && sp.id===id) store.del('sessionPrev');
+  const as=store.get('adultSession',null); if(as && as.id===id) store.del('adultSession');
+  const here=store.get('kidsHere',[]); if(Array.isArray(here) && here.includes(id)) store.set('kidsHere', here.filter(x=>x!==id));
+  const seen=store.get('lastSeen',{}); if(seen && typeof seen==='object' && Object.prototype.hasOwnProperty.call(seen,id)){ delete seen[id]; store.set('lastSeen',seen); }
+  const keys=[]; try{ for(let i=0;i<localStorage.length;i++) keys.push(localStorage.key(i)); }catch(e){}
+  for(const k of keys) if(k && (k.startsWith('bqt_'+id+'__') || k==='bqt_pw_'+id)) try{ localStorage.removeItem(k); }catch(e){}
+  kontoOhne('bqt_personEvents', o=>{ delete o[id]; });
+  kontoOhne('bqt_abgleich', o=>{ delete o['person:'+id]; });
+  kontoOhneEintraege('bqt_abgleichVerworfen', v=>v.bereich==='person:'+id);
+  if(familie) kontoFamilieWeg(familie);
+  if(typeof indexedDB!=='undefined') try{ indexedDB.deleteDatabase('bqt_audio__'+id); }catch(e){}
+}
+/* a family area gone (the last parent deleted his account): its device state and log leave this device */
+function kontoFamilieWeg(f){
+  kontoOhne('bqt_abgleich', o=>{ delete o['familie:'+f]; });
+  kontoOhne('bqt_familyEvents', o=>{ delete o[f]; });
+  kontoOhneEintraege('bqt_abgleichVerworfen', v=>v.bereich==='familie:'+f);
+}
+/* device storage helpers: an object without some keys / a list without some entries (written only if something went) */
+function kontoOhne(lk, f){ try{ const o=JSON.parse(localStorage.getItem(lk)||'null'); if(o && typeof o==='object' && !Array.isArray(o)){ const n=Object.keys(o).length; f(o); if(Object.keys(o).length!==n) localStorage.setItem(lk, JSON.stringify(o)); } }catch(e){} }
+function kontoOhneEintraege(lk, weg){ try{ const l=JSON.parse(localStorage.getItem(lk)||'null'); if(Array.isArray(l)){ const n=l.filter(v=>!(v && typeof v==='object' && weg(v))); if(n.length!==l.length) localStorage.setItem(lk, JSON.stringify(n)); } }catch(e){} }
 function kontoBinden(body){
   const de=PL()==='de', q=s=>body.querySelector(s), an=(s,f)=>{ const e=q(s); if(e) e.addEventListener('click',f); }, form=(s,f)=>{ const e=q(s); if(e) e.addEventListener('submit',ev=>{ ev.preventDefault(); if(parentAccess) f(); }); };
   an('#parentLeave',()=>{ if(parentAccess) kontoBereichVerlassen(); });
@@ -11153,6 +11503,40 @@ function kontoBinden(body){
   an('#kQrFertig',()=>kontoBlattZeigen(null));
   an('#kQrWeg',()=>{ const b=kontoBlatt; if(!b || b.art!=='qr') return; kontoSchritt('#kQrWeg', async()=>{ const z=kontoZugang(); const r=await anmZurueckziehen({zugang:z, ablage:localStorage, konto:kontoIch(), id:b.id, now:Date.now()}); await kontoAbgleich(); kontoMeldungen.push({art:'info', text:r.zurueckgezogen?(de?`Die Einladung für ${b.zweck==='eltern'?b.login:b.name} ist zurückgezogen.`:`The invitation for ${b.zweck==='eltern'?b.login:b.name} is withdrawn.`):(de?'Die Einladung war schon eingelöst oder abgelaufen.':'The invitation was already used or had expired.')}); kontoBlattZeigen(null); }); });
   an('#kWegJa',()=>{ const b=kontoBlatt; kontoSchritt('#kWegJa', async()=>{ const z=kontoZugang(); await anmGeraetEntfernen({ablage:localStorage, zugang:z, konto:kontoIch(), person:b.kind, geraet:b.geraet, now:Date.now()}); await kontoAbgleich(); kontoBlattZeigen({art:'frageneu', kind:b.kind, name:b.name}); }); });
+  body.querySelectorAll('[data-kexport]').forEach(b=>b.addEventListener('click',()=>{ if(parentAccess) kontoExport(b.dataset.kexport); }));
+  body.querySelectorAll('[data-kloesch]').forEach(b=>b.addEventListener('click',()=>{
+    if(!parentAccess) return;
+    const k=kontoIch(), c=k && kontoVerb(k).kinder.find(x=>x.id===b.dataset.kloesch); if(!c) return;
+    kontoBlattZeigen({art:'loeschkind', kind:c.id, login:c.name, name:kontoKindName(c.id, c.name)});
+  }));
+  an('#kKontoLoeschen',()=>{ if(!parentAccess) return; const k=kontoIch(); if(!k) return; const v=kontoVerb(k); kontoBlattZeigen({art:'loeschkonto', letzter:!v.eltern.some(p=>p!==k.kennung)}); });
+  an('#kExHtml',()=>{ const b=kontoBlatt; if(b && b.art==='export') kontoDateiSichern(b.html, b.dateiname.html, 'text/html', de, q('#kMsg')); });
+  an('#kExJson',()=>{ const b=kontoBlatt; if(b && b.art==='export') kontoDateiSichern(b.json, b.dateiname.json, 'application/json', de, q('#kMsg')); });
+  form('#kLoeschForm',()=>{
+    const b=kontoBlatt; if(!b || b.art!=='loeschkind') return;
+    if(anmName(q('#kLoeschName').value)!==b.login){ q('#kMsg').textContent=de?'Der Anmeldename stimmt nicht – es wurde nichts gelöscht.':'The login name does not match – nothing was deleted.'; return; }
+    kontoSchritt('#kLoeschGo', ()=>kontoLoeschenLauf(async()=>{
+      const z=kontoZugang(), me=kontoIch(); if(!z || !me) throw Object.assign(new Error('kein Zugang'),{code:'offline'});
+      await anmKindLoeschen({ablage:localStorage, zugang:z, konto:me, kind:b.kind, now:Date.now(), heute:dayKey(), geraetName:kontoGeraetName()});
+      kontoLokalWeg(b.kind);
+      kontoMeldungen.push({art:'ok', text:de?`✓ ${b.name} ist gelöscht.`:`✓ ${b.name} is deleted.`});
+      kontoKontenAuffrischen(); evNeuLaden();
+      kontoBlattZeigen(null);
+    }));
+  });
+  form('#kKlForm',()=>{
+    const b=kontoBlatt, pw=q('#kKlPw').value; if(!b || b.art!=='loeschkonto' || !pw) return;
+    kontoSchritt('#kKlGo', ()=>kontoLoeschenLauf(async()=>{
+      const z=kontoZugang(), me=kontoIch(); if(!z || !me) throw Object.assign(new Error('kein Zugang'),{code:'offline'});
+      const familie=kontoVerb(me).familie;
+      const r=await anmKontoLoeschen({ablage:localStorage, zugang:z, konto:me, passwort:pw, now:Date.now(), heute:dayKey(), geraetName:kontoGeraetName()});
+      for(const k of r.kinder||[]) kontoLokalWeg(k.kind);
+      kontoLokalWeg(me.kennung, r.familieGeloescht ? familie : null);
+      kontoKontenAuffrischen(); evNeuLaden();
+      parentAbmelden();
+      const lb=$('#loginBody'); if(lb && !$('#login').hidden) lb.insertAdjacentHTML('afterbegin', `<p class="kmeld kmeld-ok" id="kKontoWeg">✓ ${de?'Ihr Konto ist gelöscht.':'Your account is deleted.'}</p>`);
+    }));
+  });
   an('#kNeuJa',()=>kontoKindNeuStarten(kontoBlatt.kind));
   an('#kNeuSpaeter',()=>kontoBlattZeigen(null));
   an('#kErnUse',()=>{ const v=q('#kErnSugg').textContent; q('#kErnNeu1').value=v; q('#kErnNeu2').value=v; q('#kErnNeu1').type='text'; });
@@ -11279,7 +11663,17 @@ STANDARD_TEXT['E-S2']='Sprechen und Zuhören: Meinungen äußern und besprechen'
    ES = emerging with support, Obs. = observed, Ind. = independent. */
 const SCHOOL_DATA=null||{};
 const schoolKid = () => { const n=viewedKid(), a=n && APP_ACCOUNTS.users.find(u=>u.user===n && u.role==='student'); return a ? a.id : null; };
-const schoolData = () => { if(!accountsOn()) return null; const g=viewerGrant(); if(g && !g.scope.includes('school')) return null; return SCHOOL_DATA[schoolKid()]||null; };
+/* With accounts in the storage (family build, test instance; KONTO_UI) there is no SCHOOL_DATA: the ratings are in the
+   child's account (area schule, school_import - werkzeug/schulbewertungen-uebernehmen.mjs) and come with the sync into
+   its log. Computed from that log (module anmeldung: anmSchule), anew only when the log changed. */
+let schoolCache=null;
+function schoolFromAccount(id){
+  if(!id || typeof anmSchule!=='function') return null;
+  const log=evKindLog('bqt_'+id+'__'), v=log.version();
+  if(!schoolCache || schoolCache.id!==id || schoolCache.v!==v){ let d=null; try{ d=anmSchule(log.liste(), Date.now()); }catch(e){ eventErrors.push('schule: '+String(e&&e.message||e)); } schoolCache={id, v, d}; }
+  return schoolCache.d;
+}
+const schoolData = () => { if(!accountsOn()) return null; const g=viewerGrant(); if(g && !g.scope.includes('school')) return null; const id=schoolKid(); return (KONTO_UI ? schoolFromAccount(id) : SCHOOL_DATA[id])||null; };
 const SL={C:'c',M:'m',E:'e',RS:'rs',N:'rs'};
 /* latest rating per standard: [{day, r}] newest first */
 function schoolRatings(d){
@@ -11296,8 +11690,8 @@ function schoolStandFor(k){
 const fmtDay = d => PL()==='de' ? d.split('-').reverse().join('.') : new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 /* School data (concept 5.3/5.4, C1): texts shared by the block in the subject view and the history chapter. */
 function schoolTexts(de){
-  return de?{h:'Einstufungen der Schule',intro:'Von der Lernplattform übernommen (Stand {d}). Alle Einstufungen hier sind die der Lehrkraft; wo sich das Kind selbst eingeschätzt hat, steht das daneben. Die App nutzt sie als <b>Startwert für die Aufgabenwahl</b>, solange in der App noch zu wenig geübt wurde; danach zählt die eigene Übung. Das Kind sieht davon nichts.',std:'Standards – zuletzt',area:'Bereich',now:'Einstufung',before:'vorher',quests:'Übt in der App',atl:'Lernkompetenzen und Learner Profile',atlKey:'ES = mit Unterstützung, Obs. = beobachtet, Ind. = selbstständig',tasks:'Bewertete Aufgaben',good:'Das gelingt',next:'Nächste Schritte',pend:'Wartet auf Bewertung',none:'Für dieses Kind liegen noch keine Einstufungen der Schule vor.',areas:{math:'Mathe',english:'Englisch',science:'Science',learner:'Lernen'}}
-                :{h:'School ratings',intro:'Taken from the learning platform (as of {d}). All ratings here are the teacher’s; where your child rated themselves, that is shown next to it. The app uses them as a <b>starting point for choosing tasks</b> while there is too little practice in the app; after that the app’s own practice counts. Your child never sees them.',std:'Standards – latest',area:'Area',now:'Rating',before:'before',quests:'Practiced in the app',atl:'Learning skills and learner profile',atlKey:'ES = emerging with support, Obs. = observed, Ind. = independent',tasks:'Evaluated assignments',good:'Going well',next:'Next steps',pend:'Awaiting evaluation',none:'There are no school ratings for this child yet.',areas:{math:'Math',english:'English',science:'Science',learner:'Learning'}};
+  return de?{h:'Schulische Einstufungen',std:'Standards – zuletzt',area:'Bereich',now:'Einstufung',before:'vorher',quests:'Übt in der App',atl:'Lernkompetenzen und Learner Profile',atlKey:'ES = mit Unterstützung, Obs. = beobachtet, Ind. = selbstständig',tasks:'Bewertete Aufgaben',good:'Das gelingt',next:'Nächste Schritte',pend:'Wartet auf Bewertung',none:'Für dieses Kind liegen noch keine schulischen Einstufungen vor.',areas:{math:'Mathe',english:'Englisch',deutsch:'Deutsch',science:'Science',learner:'Lernen'}}
+                :{h:'School assessments',std:'Standards – latest',area:'Area',now:'Rating',before:'before',quests:'Practiced in the app',atl:'Learning skills and learner profile',atlKey:'ES = emerging with support, Obs. = observed, Ind. = independent',tasks:'Evaluated assignments',good:'Going well',next:'Next steps',pend:'Awaiting evaluation',none:'There are no school assessments for this child yet.',areas:{math:'Math',english:'English',deutsch:'Deutsch',science:'Science',learner:'Learning'}};
 }
 /* the subject a standard is shown in: where all its quests are practised, otherwise the subject of its code
    (M- maths, E- English, S- science, otherwise German) - every standard in exactly one subject (R1) */
@@ -11338,17 +11732,91 @@ function schoolSubjectLevel(key){
   const ls=Object.keys(per).filter(s=>stdSubject(s)===key).map(s=>SL[per[s][0].r]).filter(Boolean);
   return ls.length ? ls.sort((a,b)=>order.indexOf(a)-order.indexOf(b))[0] : null;
 }
-/* 🏫 School evaluations – history (concept 5.3, C1): only the evaluated and the waiting assignments, newest first */
+/* 🏫 School assessments (Peter, 05.11., point 4): a lean overview with the same outline for every assignment instead
+   of a long list of folded texts. One row per evaluated assignment: date · subject · assignment · ratings in words ·
+   "Details". Filter by subject, period and "only needs support / getting there"; sort by date (newest first), subject
+   or rating (weakest first). Details in a fixed outline: standards · rubric (teacher / self side by side) · strengths ·
+   next steps, as short points. "Awaiting evaluation" is a small block of its own. Every date comes from the data
+   (asOf, day), none is written into the app. Narrow screens show cards instead of the table (CSS .pstab). */
+const SCHOOL_ORDER=['rs','c','m','e'], SCHOOL_AREAS=['math','science','english','deutsch','learner'];   // subjects in the school's order
+const SCHOOL_FILTER0={area:'', period:'all', weak:false, sort:'date'};
+const SCHOOL_UI={de:{asOf:'Stand der Daten',latest:'neueste Bewertung',who:'Einstufungen der Lehrkraft; Ihr Kind sieht sie nicht.',subject:'Fach',all:'Alle',period:'Zeitraum',p:{all:'Alles','8w':'Letzte 8 Wochen',year:'Dieses Schuljahr'},weak:'Nur „Braucht Unterstützung“ / „Wird sicherer“',sort:'Sortieren',s:{date:'Datum (neueste zuerst)',subject:'Fach',level:'Einstufung (schwächste zuerst)'},count:'{n} von {m} Aufgaben',empty:'Keine Aufgabe passt zu diesem Filter.',reset:'Filter zurücksetzen',date:'Datum',task:'Aufgabe',rating:'Einstufung',details:'Details',close:'Schließen',standards:'Standards',rubric:'Bewertungsraster',crit:'Kriterium',teacher:'Lehrkraft',self:'Selbst',strengths:'Stärken',none:'keine Angabe',atl:{ES:'mit Unterstützung','Obs.':'beobachtet','Ind.':'selbstständig'},turnedIn:'abgegeben'},
+                 en:{asOf:'Data as of',latest:'latest evaluation',who:'The teacher’s assessments; your child never sees them.',subject:'Subject',all:'All',period:'Period',p:{all:'All','8w':'Last 8 weeks',year:'This school year'},weak:'Only “Needs support” / “Getting there”',sort:'Sort by',s:{date:'Date (newest first)',subject:'Subject',level:'Rating (weakest first)'},count:'{n} of {m} assignments',empty:'No assignment matches this filter.',reset:'Reset filters',date:'Date',task:'Assignment',rating:'Rating',details:'Details',close:'Close',standards:'Standards',rubric:'Rubric',crit:'Criterion',teacher:'Teacher',self:'Self',strengths:'Strengths',none:'none given',atl:{ES:'emerging with support','Obs.':'observed','Ind.':'independent'},turnedIn:'turned in'}};
+/* the ratings of an assignment, weakest first, with how many standards got each: [['c',4],['m',2]] */
+function schoolTaskLevels(t){ const n={}; Object.values(t.std||{}).forEach(r=>{ const k=SL[r]; if(k) n[k]=(n[k]||0)+1; }); return SCHOOL_ORDER.filter(k=>n[k]).map(k=>[k,n[k]]); }
+const schoolWeakest = t => { const l=schoolTaskLevels(t); return l.length?SCHOOL_ORDER.indexOf(l[0][0]):SCHOOL_ORDER.length; };
+const schoolAreaIdx = a => { const i=SCHOOL_AREAS.indexOf(a); return i<0?SCHOOL_AREAS.length:i; };
+/* the school year starts on 1 August (the school calendar of the platform starts in August) */
+const schoolYearStart = today => { const [y,m]=today.split('-').map(Number); return (m>=8?y:y-1)+'-08-01'; };
+function schoolFiltered(d, f, today){
+  let l=d.tasks.map((t,i)=>({t,i})).filter(x=>!x.t.pending);
+  if(f.area) l=l.filter(x=>x.t.area===f.area);
+  if(f.period==='8w') l=l.filter(x=>daysBetween(x.t.day,today)<=56);
+  if(f.period==='year') l=l.filter(x=>x.t.day>=schoolYearStart(today));
+  if(f.weak) l=l.filter(x=>schoolTaskLevels(x.t).some(([k])=>k==='rs'||k==='c'));
+  const byDate=(a,b)=>a.t.day<b.t.day?1:a.t.day>b.t.day?-1:a.i-b.i;
+  const cmp={subject:(a,b)=>(schoolAreaIdx(a.t.area)-schoolAreaIdx(b.t.area))||byDate(a,b), level:(a,b)=>(schoolWeakest(a.t)-schoolWeakest(b.t))||byDate(a,b)}[f.sort]||byDate;
+  return l.sort(cmp);
+}
+/* a teacher's text as short points: split at ";" and at the end of a sentence (not after "z. B.", "e.g.") */
+const schoolPoints = s => String(s||'').replace(/([A-Za-zÄÖÜäöüß]{2})\.\s+(?=[A-ZÄÖÜ])/g,'$1\u0001').split(/;\s+|\u0001/).map(x=>x.trim().replace(/\.$/,'')).filter(Boolean);
+const schoolArea = (a, T) => T.areas[a] || a;
+const schoolWord = k => `<span class="pst ${k}">${PSTAND[PL()][k]}</span>`;
+function schoolDetailHTML(t, U, T, de){
+  const L=de?'de':'en', none=`<p class="small">${U.none}</p>`, names=qs=>(qs||[]).filter(q=>WORLDS[q]).map(q=>esc(WORLDS[q].name)).join(', ');
+  const std=Object.entries(t.std||{}).map(([s,r])=>`<li>${esc((de?STANDARD_TEXT:STANDARD_TEXT_EN)[s]||s)} ${SL[r]?schoolWord(SL[r]):esc(r)}</li>`)
+    .concat(Object.entries(t.atl||{}).map(([a,v])=>`<li>${esc(a)}: <b>${esc(U.atl[v]||v)}</b></li>`)).join('');
+  const rub=(t.rubric||[]).map(x=>`<tr><td>${esc(x.crit)}</td><td>${SL[x.teacher]?schoolWord(SL[x.teacher]):'–'}</td><td>${SL[x.self]?schoolWord(SL[x.self]):'–'}</td></tr>`).join('');
+  const list=s=>{ const p=schoolPoints(s); return p.length?`<ul>${p.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:none; };
+  const fq=names(t.focusNext), pq=names(t.quests);
+  return `<h4>${U.standards}</h4>${std?`<ul>${std}</ul>`:none}`
+    +`<h4>${U.rubric}</h4>${rub?`<table class="dt psrub"><thead><tr><th>${U.crit}</th><th>${U.teacher}</th><th>${U.self}</th></tr></thead><tbody>${rub}</tbody></table>`:none}`
+    +`<h4>${U.strengths}</h4>${list(t.good&&t.good[L])}`
+    +`<h4>${T.next}</h4>${list(t.next&&t.next[L])}`
+    +(fq?`<p class="small">${de?'Daraus im automatischen Fokus':'In the automatic focus because of this'}: ${fq}</p>`:'')
+    +(pq?`<p class="small">${T.quests}: ${pq}</p>`:'');
+}
+function schoolListHTML(d){
+  const de=PL()==='de', U=SCHOOL_UI[de?'de':'en'], T=schoolTexts(de), f=state.sfilt||SCHOOL_FILTER0, open=state.sopen||[];
+  const all=d.tasks.filter(t=>!t.pending).length, l=schoolFiltered(d, f, dayKey());
+  const rows=l.map(({t,i})=>{ const lv=schoolTaskLevels(t), op=open.includes(i);
+    return `<tr class="psrow" data-psrow="${i}"><td data-l="${U.date}">${fmtDay(t.day)}</td><td data-l="${U.subject}">${esc(schoolArea(t.area,T))}</td><td data-l="${U.task}">${esc(t.title)}</td>`
+      +`<td data-l="${U.rating}"><span class="pslv">${lv.length?lv.map(([k,n])=>`<span class="pst ${k}">${n>1?n+'× ':''}${PSTAND[PL()][k]}</span>`).join(''):'–'}</span></td>`
+      +`<td><button type="button" class="btn small" data-psdet="${i}" aria-expanded="${op}">${op?U.close:U.details}</button></td></tr>`
+      +`<tr class="psdet" data-psdetrow="${i}"${op?'':' hidden'}><td colspan="5">${schoolDetailHTML(t,U,T,de)}</td></tr>`; }).join('');
+  return `<p class="small pscount" role="status">${U.count.replace('{n}',l.length).replace('{m}',all)}</p>`
+    +(l.length?`<table class="dt pstab"><thead><tr><th>${U.date}</th><th>${U.subject}</th><th>${U.task}</th><th>${U.rating}</th><th><span class="sr-only">${U.details}</span></th></tr></thead><tbody>${rows}</tbody></table>`
+      :`<p>${U.empty} <button type="button" class="btn small" data-psreset>${U.reset}</button></p>`);
+}
 function schoolHTML(){
-  const d=schoolData(), de=PL()==='de', L=de?'de':'en', T=schoolTexts(de);
-  const h=de?'Bewertungen der Schule – Verlauf':'School evaluations – history';
+  const d=schoolData(), de=PL()==='de', T=schoolTexts(de), U=SCHOOL_UI[de?'de':'en'], f=state.sfilt||SCHOOL_FILTER0;
+  const h=de?'Schulische Einstufungen':'School assessments';
   if(!d) return `<h2>${h}</h2><p>${T.none}</p>`;
-  const rub=t=>t.rubric?`<p><b>${de?'Bewertungsraster':'Rubric'}:</b></p><ul>${t.rubric.map(x=>`<li>${esc(x.crit)}: ${de?'Lehrkraft':'teacher'} ${pChip(SL[x.teacher])} · ${de?'selbst eingeschätzt':'self-rating'} ${pChip(SL[x.self])}</li>`).join('')}</ul>`:'';
-  const task=t=>`<details class="about-sec"><summary>${fmtDay(t.day)} · ${esc(t.title)}</summary><div class="about-sec-body">${Object.keys(t.std).length?`<p>${Object.entries(t.std).map(([s,r])=>`${esc((de?STANDARD_TEXT:STANDARD_TEXT_EN)[s]||s)}: ${pChip(SL[r])}`).join('<br>')}</p>`:''}${rub(t)}<p><b>${T.good}:</b> ${esc(t.good[L])}</p>${t.next[L]?`<p><b>${T.next}:</b> ${esc(t.next[L])}</p>`:''}${(t.focusNext||[]).length?`<p class="small">${de?'Daraus im automatischen Fokus':'In the automatic focus because of this'}: ${t.focusNext.filter(q=>WORLDS[q]).map(q=>esc(WORLDS[q].name)).join(', ')}</p>`:''}<p class="small">${T.quests}: ${t.quests.filter(q=>WORLDS[q]).map(q=>esc(WORLDS[q].name)).join(', ')}</p></div></details>`;
-  const done=d.tasks.filter(t=>!t.pending).sort((a,b)=>a.day<b.day?1:-1), pend=d.tasks.filter(t=>t.pending);
-  return `<h2>${h}</h2><p class="small">${T.intro.replace('{d}',fmtDay(d.asOf))}</p>`
-    +`<h3 class="psub">${T.tasks}</h3><div class="about-menu">${done.map(task).join('')}</div>`
-    +(pend.length?`<h3 class="psub">${T.pend}</h3><div class="about-menu">${pend.map(task).join('')}</div>`:'');
+  const done=d.tasks.filter(t=>!t.pending), pend=d.tasks.filter(t=>t.pending).sort((a,b)=>a.day<b.day?1:-1);
+  const latest=done.reduce((m,t)=>t.day>m?t.day:m,''), stand=d.asOf||latest;
+  const areas=SCHOOL_AREAS.concat(uniq(done.map(t=>t.area)).filter(a=>!SCHOOL_AREAS.includes(a))).filter(a=>done.some(t=>t.area===a));
+  const opt=(v,txt,cur)=>`<option value="${esc(v)}"${v===cur?' selected':''}>${esc(txt)}</option>`;
+  return `<h2>${h}</h2><p class="small psstand">${stand?`${U.asOf}: ${fmtDay(stand)}`:''}${latest?` · ${U.latest}: ${fmtDay(latest)}`:''}. ${U.who}</p>`
+    +(pend.length?`<div class="pspend"><h3 class="psub">⏳ ${T.pend}</h3><ul class="small">${pend.map(t=>`<li>${fmtDay(t.day)} · ${esc(schoolArea(t.area,T))} · ${esc(t.title)}</li>`).join('')}</ul></div>`:'')
+    +`<div id="pSchoolAll"><div class="psfilters">`
+    +`<label>${U.subject}<select data-psf="area">${opt('',U.all,f.area)}${areas.map(a=>opt(a,schoolArea(a,T),f.area)).join('')}</select></label>`
+    +`<label>${U.period}<select data-psf="period">${['all','8w','year'].map(p=>opt(p,U.p[p],f.period)).join('')}</select></label>`
+    +`<label>${U.sort}<select data-psf="sort">${['date','subject','level'].map(s=>opt(s,U.s[s],f.sort)).join('')}</select></label>`
+    +`<label class="pscheck"><input type="checkbox" data-psf="weak"${f.weak?' checked':''}> ${U.weak}</label></div>`
+    +`<div id="psList">${schoolListHTML(d)}</div></div>`;
+}
+/* filters and details change the list in place (no new rendering of the whole area, the page does not jump) */
+function bindSchoolList(body){
+  const box=body.querySelector('#pSchoolAll'); if(!box) return;
+  const redraw=()=>{ const d=schoolData(), el=box.querySelector('#psList'); if(d && el) el.innerHTML=schoolListHTML(d); };
+  box.addEventListener('change',e=>{ const k=e.target.dataset.psf; if(!k || !parentAccess) return;
+    state.sfilt={...(state.sfilt||SCHOOL_FILTER0), [k]: k==='weak'?e.target.checked:e.target.value}; redraw(); });
+  box.addEventListener('click',e=>{ if(!parentAccess) return;
+    const r=e.target.closest('[data-psreset]'); if(r){ state.sfilt={...SCHOOL_FILTER0}; box.querySelectorAll('[data-psf]').forEach(x=>{ if(x.type==='checkbox') x.checked=false; else x.value=SCHOOL_FILTER0[x.dataset.psf]; }); redraw(); return; }
+    const b=e.target.closest('[data-psdet]'); if(!b) return;
+    const i=Number(b.dataset.psdet), open=state.sopen||(state.sopen=[]), row=box.querySelector(`[data-psdetrow="${i}"]`), U=SCHOOL_UI[PL()==='de'?'de':'en'];
+    const now=!open.includes(i); if(now) open.push(i); else open.splice(open.indexOf(i),1);
+    if(row) row.hidden=!now; b.setAttribute('aria-expanded',String(now)); b.textContent=now?U.close:U.details; });
 }
 function parentOverviewHTML(){
   const ev=store.get('ev',{}), attempts=store.get('attempts',[]);
@@ -11397,7 +11865,7 @@ function calendarText(days,time,text,now=new Date()){
 }
 function bindParentSettings(){
   const de=PL()==='de';
-  bindStoryCap(); bindProfileAdmin(); bindVersionAdmin(); addAdultInfo($('#aboutBody'));
+  bindStoryCap(); bindProfileAdmin(); bindMySchoolAdmin(); bindVersionAdmin(); addAdultInfo($('#aboutBody'));
   // "Log out" ends it (Peter, 31.10.): no timer, no log-out in the background. With accounts in the storage (test build)
   // "Close" leaves the area and the grown-up stays logged in (concept 10.4; kontoBereichVerlassen).
   ['#parentClose','#parentClose2'].forEach(sel=>{ const pc=$(sel); if(pc) pc.addEventListener('click',parentAbmelden); });
@@ -11425,7 +11893,7 @@ const SCHOOL_WAY={
              en:{text:'Complete steps, fitting sentence starters, the impersonal “man” form, and the separable verb prefix at the end of the sentence.',questions:['Which step comes first?','Could someone follow your instructions without asking?','Where does the verb prefix go?'],source:'Class assignment “Anleitung schreiben” (learning platform).'}}
 };
 SCHOOL_WAY.combos=SCHOOL_WAY.wordprob;
-/* "Supporting your child": the general rules in one short chapter (practical, not concept). */
+/* "How to support your child": the general rules in one short chapter (practical, not concept). */
 /* concept 7.1 (F5): "Our suggestion" on top (spaced practice, IES Practice Guide in the sources; never measured, not in
    "At a glance"), then the five rules. A time per round would need time stamps - the answers keep only the day. */
 function supportGuideHTML(){
@@ -11433,7 +11901,7 @@ function supportGuideHTML(){
   const cal=isTeacher()?'':` ${de?'Eine Erinnerung im Kalender richten Sie unter':'You can set up a calendar reminder under'} ${(de?GO:GO_EN)('kind',esc(set))}${de?' ein':''}.`;
   return de
     ? `<h2>So unterstützen Sie Ihr Kind</h2><p class="phow psuggest">🗓️ <b>Unser Vorschlag:</b> Lieber oft kurz als selten lang: zum Beispiel 2–3 Runden pro Woche, je etwa 10 Minuten. Verteiltes Üben wirkt besser als viel auf einmal (Beleg: IES Practice Guide, siehe Quellen).${cal}</p><ol class="steps"><li><b>Erst fragen, dann helfen:</b> „Wie habt ihr das in der Klasse gemacht?“ Dann genau dort helfen, wo Ihr Kind stockt – mit dem Weg der Klasse.</li><li><b>Fragen statt erklären:</b> „Zeig mir deinen ersten Schritt.“ – „Woher weißt du das?“ – „Was fehlt noch?“</li><li><b>Fehler sind normal:</b> ruhig bleiben, Dranbleiben loben statt „schlau sein“. Ein kleiner Tipp, dann selbst weiterprobieren lassen.</li><li><b>Mit Freude:</b> Die App ist ein Zusatz zu den Hausaufgaben, keine Pflicht.</li><li><b>Konkretes zu jedem Thema</b> steht bei jeder Quest unter „💡 So helfen Sie“.</li></ol>`
-    : `<h2>Supporting your child</h2><p class="phow psuggest">🗓️ <b>Our suggestion:</b> often and short rather than rarely and long – for example 2–3 rounds a week, about 10 minutes each. Spaced practice works better than a lot at once (evidence: IES Practice Guide, see Sources).${cal}</p><ol class="steps"><li><b>Ask first, then help:</b> “How did you do this in class?” Then help exactly where your child gets stuck – the way the class does it.</li><li><b>Ask instead of explaining:</b> “Show me your first step.” – “How do you know?” – “What is still missing?”</li><li><b>Mistakes are normal:</b> stay calm and praise sticking with it rather than “being smart”. Give a small tip, then let your child try again.</li><li><b>With joy:</b> the app is an extra to homework, not a must.</li><li><b>Concrete help for each topic</b> is at every quest under “💡 How you can help”.</li></ol>`;
+    : `<h2>How to support your child</h2><p class="phow psuggest">🗓️ <b>Our suggestion:</b> often and short rather than rarely and long – for example 2–3 rounds a week, about 10 minutes each. Spaced practice works better than a lot at once (evidence: IES Practice Guide, see Sources).${cal}</p><ol class="steps"><li><b>Ask first, then help:</b> “How did you do this in class?” Then help exactly where your child gets stuck – the way the class does it.</li><li><b>Ask instead of explaining:</b> “Show me your first step.” – “How do you know?” – “What is still missing?”</li><li><b>Mistakes are normal:</b> stay calm and praise sticking with it rather than “being smart”. Give a small tip, then let your child try again.</li><li><b>With joy:</b> the app is an extra to homework, not a must.</li><li><b>Concrete help for each topic</b> is at every quest under “💡 How you can help”.</li></ol>`;
 }
 /* School website links: adults only (grown-ups area), neutral labels. The child-facing info pages
    never name or link the school. (The planning list of later topics was removed, Peter 31.10.:
@@ -11524,11 +11992,11 @@ const sourcesHTML=(lang='en')=>{ const de=lang==='de', G=SOURCE_GROUPS[de?'de':'
    all devices, start code once and 7 days, recovery code. Mia's app keeps its guides unchanged (KONTO_UI false). */
 const KONTO_GUIDE={
   kid:[['The very first time:','your grown-up gives you a start code – as a link or a QR code to scan. Then you choose your own password. Take the idea with three words and a number, like <i>Tiger-Lamp-River-4271</i>. Let the iPad remember it – then Face ID fills it in for you. A short password does not work: a strong one keeps your things safe. On another iPad, use the same user name and password.']],
-  adultDe:[['Einmal einrichten:','Seite in Safari öffnen. Fragt die App nach dem Zugang zum Testspeicher, ihn einmal eingeben (vom Admin). Dann Teilen → „Zum Home-Bildschirm“. Künftig nur über das Symbol öffnen.'],
+  adultDe:[['Einmal einrichten:','Seite in Safari öffnen. Fragt die App nach dem Zugang zum Speicher, ihn einmal eingeben (vom Admin). Dann Teilen → „Zum Home-Bildschirm“. Künftig nur über das Symbol öffnen.'],
     ['Anmelden:','„👪 Parent / Teacher“. Beim ersten Mal den Startlink bzw. QR-Code öffnen (oder Benutzername und Startcode eingeben; er gilt einmal und 7 Tage). Dann ein eigenes Passwort wählen – am einfachsten den Vorschlag – und im Passwortspeicher sichern. Danach den Wiederherstellungscode sichern: im Passwortspeicher und als Datei. Auf weiteren Geräten: Benutzername und Passwort.'],
     ['Kind anmelden:','unter ⚙️ → „👪 Familie“ → „Kind anlegen“: Die App zeigt einen Start-QR-Code. Auf dem Gerät des Kindes die Kamera darauf richten, „🎒 Student“ tippen und zusammen ein Merkpasswort wählen. Auf weiteren Geräten: Benutzername und Passwort. Passwort vergessen? Dort „Neues Passwort“ – der Lernstand bleibt. Geschwister am selben Gerät wählen sich unter „Who\'s here?“ aus. Geräte entfernen und den Schlüssel erneuern: ⚙️ → „📱 Meine Geräte“.'],
     ['Passwort vergessen:','Auf der Anmeldeseite „Passwort vergessen?“ tippen, den Wiederherstellungscode eingeben und ein neues Passwort wählen – danach den neuen Code wieder sichern. Ohne Code hilft der Admin. Nach 5 Fehlversuchen 30 Sekunden warten. Startcodes, Startlinks und den Wiederherstellungscode nicht weitergeben.']],
-  adultEn:[['Set up once:','open the page in Safari. If the app asks for access to the test storage, enter it once (from the admin). Then Share → “Add to Home Screen”. From then on, open it with the icon.'],
+  adultEn:[['Set up once:','open the page in Safari. If the app asks for access to the storage, enter it once (from the admin). Then Share → “Add to Home Screen”. From then on, open it with the icon.'],
     ['Log in:','“👪 Parent / Teacher”. The first time, open the start link or QR code (or enter username and start code; it works once and for 7 days). Then choose your own password – easiest is the suggestion – and save it in the password manager. Next, save the recovery code: in the password manager and as a file. On other devices: username and password.'],
     ['Log in your child:','under ⚙️ → “👪 Family” → “Add a child”: the app shows a start QR code. On your child’s device, point the camera at it, tap “🎒 Student” and choose a memorable password together. On other devices: username and password. Forgot the password? There, “New password” – the progress stays. Siblings on the same device pick themselves under “Who\'s here?”. Remove devices and renew your key: ⚙️ → “📱 My devices”.'],
     ['Forgot your password?','On the login page tap “Forgot your password?”, enter your recovery code and choose a new password – then save the new code again. Without the code, the admin can help. After 5 wrong tries, wait 30 seconds. Keep start codes, start links and the recovery code private.']],
@@ -11556,7 +12024,7 @@ const GUIDE_KID=kontoTexte(`<div class="quick"><b>Quick guide</b><ol>
 <li><b>After a round:</b> choose a joke, the Mystery Question or a Pisolala story.</li>
 <li><b>Lese-Studio:</b> read aloud, record yourself and listen. Your grown-up can help you share the best recording with your class.</li>
 <li><b>Practice sheet:</b> make a sheet with a grown-up and work on paper. Then tap your sheet under “My sheets” and type in your answers – just like Practise Today.</li>
-<li><b>My profile:</b> tap your name at the top to change your name, last name, birthday or emoji.</li>
+<li><b>My profile:</b> tap your name at the top to change your name, last name, birthday or emoji. <b>My school</b> is there too: your grade, class and school.</li>
 <li><b>Your grown-ups</b> can see what you have worked on. There are no grades in Big Quest – only learning. Other grown-ups, like a teacher, can only look if your parents allow it.</li>
 <li><b>Log out</b> when someone else wants to use this iPad. Your brother or sister then taps their own name and types their own password.</li>
 </ol>`, KONTO_GUIDE.kid);
@@ -11569,7 +12037,7 @@ const GUIDE_ADULT_DE=kontoTexte(`<h3 class="pguide-h">Hilfe für Eltern</h3><ol 
 <li><b>Kind anmelden:</b> „🎒 Student“ mit dem Startcode des Kindes. Zusammen ein Merkpasswort wählen und im Passwortspeicher sichern. Geschwister am selben Gerät wählen sich unter „Who's here?“ aus.</li>
 <li><b>Nachsehen:</b> Der Lernstand liegt nur auf dem Gerät, auf dem Ihr Kind übt. Mit mehreren Kindern wählen Sie oben aus. <b>Danach abmelden</b> – dann ist dort wieder Ihr Kind angemeldet.</li>
 <li><b>Sichern:</b> einmal im Monat, auf dem Gerät des Kindes: ${GO('sicherung','💾 Sicherung & Daten')}.</li>
-<li><b>Freigaben:</b> Eine Lehrkraft oder der Admin sieht Ihr Kind nur mit Ihrer Freigabe – dann mit Vor- und Nachnamen und Geburtsdatum, aber ohne Emoji und Einstellungen: ${GO('freigaben','🔐 Zugriff & Freigaben')}.</li>
+<li><b>Freigaben:</b> Eine Lehrkraft oder der Admin sieht Ihr Kind nur mit Ihrer Freigabe – dann mit Vor- und Nachnamen, Geburtsdatum, Klasse und Schule, aber ohne Emoji und Einstellungen: ${GO('freigaben','🔐 Zugriff & Freigaben')}.</li>
 <li><b>Passwort vergessen:</b> Der Startcode gilt weiter; sonst gibt der Admin einen neuen. Nach 5 Fehlversuchen 30 Sekunden warten. Familienpasswort, Startcodes und Startlinks nicht weitergeben.</li>
 </ol>`, KONTO_GUIDE.adultDe);
 const GUIDE_ADULT_EN=kontoTexte(`<h3 class="pguide-h">Help for parents</h3><ol class="steps">
@@ -11578,13 +12046,13 @@ const GUIDE_ADULT_EN=kontoTexte(`<h3 class="pguide-h">Help for parents</h3><ol c
 <li><b>Log in your child:</b> “🎒 Student” with your child’s start code. Choose a memorable password together and save it in the password manager. Siblings on the same device pick themselves under “Who's here?”.</li>
 <li><b>Take a look:</b> the progress is only on the device where your child practices. With several children, choose at the top. <b>Log out afterwards</b> – your child is then logged in there again.</li>
 <li><b>Back up:</b> once a month, on your child’s device: ${GO_EN('sicherung','💾 Backup & data')}.</li>
-<li><b>Grants:</b> a teacher or the admin sees your child only with your grant – then with first and last name and date of birth, but without emoji and settings: ${GO_EN('freigaben','🔐 Access & grants')}.</li>
+<li><b>Grants:</b> a teacher or the admin sees your child only with your grant – then with first and last name, date of birth, class and school, but without emoji and settings: ${GO_EN('freigaben','🔐 Access & grants')}.</li>
 <li><b>Forgot your password?</b> The start code keeps working; otherwise the admin gives you a new one. After 5 wrong tries, wait 30 seconds. Keep the family password, start codes and start links private.</li>
 </ol>`, KONTO_GUIDE.adultEn);
 const GUIDE_TEACHER_DE=kontoTexte(`<h3 class="pguide-h">Hilfe für Lehrkräfte</h3><ol class="steps">
 <li><b>Anmelden:</b> „👪 Parent / Teacher“, Benutzername und Startcode vom Admin – oder Startlink bzw. QR-Code. Dann ein eigenes Passwort wählen.</li>
 <li><b>Einblick nur mit Freigabe:</b> Nennen Sie den Eltern Ihren Anmeldenamen. Sie geben Einblick, befristet und im gewählten Umfang. Schuldaten sehen Sie nur, wenn die Eltern sie freigeben.</li>
-<li><b>Ansehen:</b> auf dem Gerät, auf dem das Kind übt. Sie können nur lesen, nichts ändern. Oben stehen Vor- und Nachname des Kindes, damit Sie wissen, mit wem Sie arbeiten; heißen zwei Kinder gleich, auch das Geburtsdatum. Emoji und Einstellungen sehen Sie nicht.</li>
+<li><b>Ansehen:</b> auf dem Gerät, auf dem das Kind übt. Sie können nur lesen, nichts ändern. Oben stehen Vor- und Nachname des Kindes, damit Sie wissen, mit wem Sie arbeiten; heißen zwei Kinder gleich, auch das Geburtsdatum. Klasse und Schule stehen dabei, wenn die Familie sie eingetragen hat. Emoji und Einstellungen sehen Sie nicht.</li>
 <li><b>Protokoll:</b> Die Eltern sehen, wann Sie die Übersicht angesehen haben.</li>
 <li><b>Wofür:</b> eine private Übungs-App der Familie, nicht für den dienstlichen Einsatz in der Schule. Bitte keine Bildschirmfotos weitergeben; Fragen direkt mit den Eltern klären.</li>
 <li><b>Passwort vergessen:</b> Der Startcode gilt weiter; sonst gibt der Admin einen neuen. Nach 5 Fehlversuchen 30 Sekunden warten.</li>
@@ -11592,7 +12060,7 @@ const GUIDE_TEACHER_DE=kontoTexte(`<h3 class="pguide-h">Hilfe für Lehrkräfte</
 const GUIDE_TEACHER_EN=kontoTexte(`<h3 class="pguide-h">Help for teachers</h3><ol class="steps">
 <li><b>Log in:</b> “👪 Parent / Teacher”, username and start code from the admin – or the start link or QR code. Then choose your own password.</li>
 <li><b>Access only with a grant:</b> tell the parents your login name. They give you access, for a limited time and to the extent they choose. You see school ratings only if the parents allow it.</li>
-<li><b>Look:</b> on the device where the child practices. You can only look; nothing can be changed. The child’s first and last name are shown at the top, so you know whom you are working with; if two children have the same name, the date of birth too. You do not see the emoji or settings.</li>
+<li><b>Look:</b> on the device where the child practices. You can only look; nothing can be changed. The child’s first and last name are shown at the top, so you know whom you are working with; if two children have the same name, the date of birth too. The class and school are shown if the family entered them. You do not see the emoji or settings.</li>
 <li><b>Log:</b> the parents see when you looked at the overview.</li>
 <li><b>Purpose:</b> the family’s private practice app, not for official use at school. Please do not pass on screenshots; talk to the parents directly.</li>
 <li><b>Forgot your password?</b> The start code keeps working; otherwise the admin gives you a new one. After 5 wrong tries, wait 30 seconds.</li>
@@ -11600,13 +12068,13 @@ const GUIDE_TEACHER_EN=kontoTexte(`<h3 class="pguide-h">Help for teachers</h3><o
 const GUIDE_ADMIN_DE=kontoTexte(`<h3 class="pguide-h">Für den Admin</h3><ol class="steps">
 <li><b>Konten und Startcodes</b> pflegen Sie mit dem Konten-Werkzeug auf Ihrem Rechner. Neue Startcodes als Startlink oder QR-Code nur persönlich übergeben.</li>
 <li><b>Übersicht der Konten:</b> ${GO('konten','🛠 Konten')} – nur Verwaltungsangaben, keine Inhalte.</li>
-<li><b>Lernstand eines Kindes:</b> nur mit Freigabe der Eltern, wie bei einer Lehrkraft – mit Vor- und Nachnamen und Geburtsdatum, ohne Emoji und Einstellungen. Ihr eigenes Kind sehen Sie über Ihr Elternkonto.</li>
+<li><b>Lernstand eines Kindes:</b> nur mit Freigabe der Eltern, wie bei einer Lehrkraft – mit Vor- und Nachnamen, Geburtsdatum, Klasse und Schule, ohne Emoji und Einstellungen. Ihr eigenes Kind sehen Sie über Ihr Elternkonto.</li>
 <li><b>Testkinder:</b> oben in der Kinderauswahl unter „🧪 Testkinder“; „▶ Als Testkind spielen“ öffnet die Kinderseite mit Testdaten.</li>
 </ol>`, KONTO_GUIDE.adminDe);
 const GUIDE_ADMIN_EN=kontoTexte(`<h3 class="pguide-h">For the admin</h3><ol class="steps">
 <li><b>Accounts and start codes</b> are maintained with the account tool on your computer. Hand over new start codes as a start link or QR code in person only.</li>
 <li><b>Account overview:</b> ${GO_EN('konten','🛠 Accounts')} – administrative details only, no contents.</li>
-<li><b>A child’s progress:</b> only with a grant from the parents, like a teacher – with first and last name and date of birth, without emoji and settings. You see your own child through your parent account.</li>
+<li><b>A child’s progress:</b> only with a grant from the parents, like a teacher – with first and last name, date of birth, class and school, without emoji and settings. You see your own child through your parent account.</li>
 <li><b>Test children:</b> at the top in the child list under “🧪 Test children”; “▶ Play as test child” opens the child’s pages with test data.</li>
 </ol>`, KONTO_GUIDE.adminEn);
 /* the grown-ups guide that fits the person who is logged in */
@@ -11801,9 +12269,11 @@ const ABOUT_EN=()=>`
 <p><b>Reading recordings:</b> the microphone opens only after tapping “Aufnahme starten” and is released after “Stopp”. The last three recordings stay only in this device's storage; the app never sends them. They leave the device only if someone shares or saves them via “Teilen / Sichern”. Every recording can be deleted.</p>
 <h3>Sources</h3>${sourcesHTML('en')}
 `;
-/* "So funktioniert Big Quest" (Peter, 30./31.10.): intro and important note, then every topic as an
+/* "Das Konzept von Big Quest" (Peter, 30./31.10.; title 05.11.): intro and important note, then every topic as an
    accordion that opens in place (no clicking from page to page). Language via the flags 🇩🇪/🇺🇸. */
-const ABOUT_UI={de:{title:'📖 So funktioniert Big Quest',stand:'Stand: 30. Oktober 2026.'},en:{title:'📖 How Big Quest works',stand:'Last updated: 30 October 2026.'}};
+const ABOUT_UI={de:{title:'📖 Das Konzept von Big Quest',stand:'Stand'},en:{title:'📖 The Big Quest concept',stand:'Last updated'}};
+/* No date written into the app (Peter, 05.11.): the page is as of the build of this version (APP_VERSION.date, "DD.MM.YYYY HH:MM"). */
+const aboutStandLine = lang => { const v=APP_VERSION, m=v && /^(\d\d)\.(\d\d)\.(\d{4})/.exec(v.date||''); return m ? `<p class="small about-stand">${ABOUT_UI[lang].stand}: ${fmtDay(m[3]+'-'+m[2]+'-'+m[1])}.</p>` : ''; };
 /* The user guide depends on the login (Peter, 31.10.): a logged-in child sees the child guide, not the
    grown-ups guide; grown-ups find theirs in the grown-ups area. Without accounts: both. */
 const ADULT_GUIDE_TITLES=['Anleitung für Erwachsene','Guide for grown-ups'], KID_GUIDE_TITLES=['How to use Big Quest','How to use Big Quest (für Kinder)'];
@@ -11826,8 +12296,8 @@ function renderAboutPage(open){
     $('#aboutBody').innerHTML=`<h2>${g.title}</h2>${g.body}${appVersionLine()}`;
     window.scrollTo(0,0); return;
   }
-  const lang=PL(), ui=ABOUT_UI[lang], {main}=aboutParts(lang), body=$('#aboutBody');
-  body.innerHTML=main+`<div class="about-menu">${aboutSectionsHTML(lang, open)}</div><p class="small">${ui.stand}</p>${appVersionLine()}`;
+  const lang=PL(), {main}=aboutParts(lang), body=$('#aboutBody');
+  body.innerHTML=main+`<div class="about-menu">${aboutSectionsHTML(lang, open)}</div>${aboutStandLine(lang)}${appVersionLine()}`;
   if(open){ const d=[...body.querySelectorAll('details.about-sec')].find(x=>x.open); if(d) setTimeout(()=>d.scrollIntoView({block:'start'}),0); }
   else window.scrollTo(0,0);
 }
@@ -11996,6 +12466,10 @@ $('#profileBtn').addEventListener('click',openProfile);
 $('#rank').addEventListener('click',openRankPath);
 $('#rankClose').addEventListener('click',()=>{ const d=$('#rankDlg'); if(d.close) d.close(); else d.removeAttribute('open'); });
 $('#pfClose').addEventListener('click',closeProfile);
+$('#pfSchool').addEventListener('click',openMySchool);   // on top of "My profile"; what is typed there stays
+$('#schoolAskBtn').addEventListener('click',openMySchool);
+$('#msClose').addEventListener('click',closeMySchool);
+$('#schoolForm').addEventListener('submit',e=>{ e.preventDefault(); saveMySchoolDlg(); });
 $('#profileForm').addEventListener('submit',e=>{ e.preventDefault(); saveProfile(); });
 document.addEventListener('pointerdown',e=>{ if(savedTimer && !e.target.closest('#profileDlg')) hideSaved(); });
 $('#soundBtn').addEventListener('click',()=>{ const muted=!isMuted(); store.set('muted',muted); if((eventWho()||{}).role==='child') eventHook('profile_set',{field:'muted', value:muted}); else eventHook('person_set',{field:'muted', value:muted});   // the child's own switch (3b-1b-4); a grown-up's: his person area (3b-1c)
