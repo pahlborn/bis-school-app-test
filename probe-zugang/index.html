@@ -10,10 +10,9 @@
 <title>Zugang Probe</title>
 <style>
   body { font-family: -apple-system, system-ui, sans-serif; max-width: 34rem; margin: 0 auto; padding: 1.2rem; background: #EEF4FB; color: #1d2433; }
-  h1 { font-size: 1.3rem; }
+  h1 { font-size: 1.3rem; } h2 { font-size: 1.05rem; margin: 0 0 .4rem; }
   .box { background: #fff; border-radius: 12px; padding: 1rem; margin: 1rem 0; }
-  .ok { color: #1b7a3a; font-weight: 600; }
-  .nein { color: #a33; font-weight: 600; }
+  .ok { color: #1b7a3a; font-weight: 600; } .nein { color: #a33; font-weight: 600; }
   label { display: block; margin: .6rem 0 .2rem; }
   input { width: 100%; font-size: 1.1rem; padding: .5rem; box-sizing: border-box; }
   button { font-size: 1.1rem; padding: .6rem 1.2rem; margin-top: .8rem; border: 0; border-radius: 8px; background: #3B5BDB; color: #fff; }
@@ -21,63 +20,97 @@
 </style>
 </head>
 <body>
-<h1>Probe: Zugang über den Passwortspeicher</h1>
-<p class="klein">Nur ein Spielwert, keine echten Daten. Fassung 1 (06.11.2026).</p>
+<h1>Probe: Zugangscode und Passwort</h1>
+<p class="klein">Nur Spielwerte, keine echten Daten. Fassung 2 (06.11.2026).</p>
 
 <div class="box">
-  <div>Läuft gerade als: <b id="modus"></b></div>
-  <div>Auf diesem Gerät gespeichert: <span id="stand"></span></div>
+  <div>Läuft als: <b id="modus"></b></div>
+  <div>Zugangscode auf diesem Gerät: <span id="standZ"></span></div>
+  <div>Angemeldet: <span id="standP"></span></div>
 </div>
 
-<div class="box" id="formBox">
-  <form id="f" autocomplete="on">
-    <label for="u">Name</label>
-    <input id="u" name="username" autocomplete="username" value="Big Quest Probe" readonly>
-    <label for="p">Zugang</label>
-    <input id="p" name="password" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
-    <p class="klein" id="hinweis"></p>
-    <button type="submit">Speichern</button>
+<div class="box" id="boxZ">
+  <h2>1. Gerät verbinden</h2>
+  <form id="fZ" autocomplete="on">
+    <label for="za">Eintrag im Passwortspeicher</label>
+    <input id="za" name="username" autocomplete="username" value="Big Quest Zugangscode" readonly>
+    <label for="z">Zugangscode</label>
+    <input id="z" name="password" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+    <p class="klein" id="hinweisZ"></p>
+    <button type="submit">Gerät verbinden</button>
+  </form>
+</div>
+
+<div class="box" id="boxP">
+  <h2>2. Anmelden</h2>
+  <form id="fP" autocomplete="on">
+    <label for="n">Anmeldename</label>
+    <input id="n" name="username" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+    <label for="p">Passwort</label>
+    <input id="p" name="password" type="password" required>
+    <p class="klein" id="hinweisP"></p>
+    <button type="submit">Anmelden</button>
   </form>
 </div>
 
 <div class="box">
-  <button id="weg" type="button" style="background:#888">Gespeicherten Wert auf diesem Gerät löschen</button>
+  <button id="weg" type="button" style="background:#888">Alles auf diesem Gerät löschen</button>
 </div>
 
 <script>
-  var KEY = 'probe_zugang';
+  var KZ = 'probe_zugang', KN = 'probe_name', KP = 'probe_pw';
   var standalone = window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
   document.getElementById('modus').textContent = standalone ? 'App vom Home-Bildschirm' : 'Safari (Browser)';
+  function ende(v) { return '…' + v.slice(-4); }
 
-  function zeigeStand() {
-    var v = localStorage.getItem(KEY);
-    var el = document.getElementById('stand');
-    if (v) { el.className = 'ok'; el.textContent = 'ja (endet auf …' + v.slice(-4) + ')'; }
-    else { el.className = 'nein'; el.textContent = 'nein'; }
+  function zeige() {
+    var z = localStorage.getItem(KZ), n = localStorage.getItem(KN), p = localStorage.getItem(KP);
+    var sZ = document.getElementById('standZ'), sP = document.getElementById('standP');
+    sZ.className = z ? 'ok' : 'nein'; sZ.textContent = z ? 'ja (endet auf ' + ende(z) + ')' : 'nein';
+    sP.className = n ? 'ok' : 'nein'; sP.textContent = n ? n + ' (Passwort endet auf ' + ende(p) + ')' : 'nein';
+    document.getElementById('boxZ').style.display = z ? 'none' : '';
+    document.getElementById('boxP').style.display = (z && !n) ? '' : 'none';
+    var pw = document.getElementById('p');
+    // erstes Mal (aus dem Link): neues Passwort festlegen, sonst vorhandenes
+    pw.setAttribute('autocomplete', sessionStorage.getItem('probe_neu') ? 'new-password' : 'current-password');
   }
-  zeigeStand();
 
-  // Link-Weg: #zugang=<wert> füllt das Feld einmal und verschwindet aus der Adresse
-  var m = /^#zugang=([A-Za-z0-9_-]+)$/.exec(location.hash || '');
-  if (m) {
-    document.getElementById('p').value = m[1];
-    document.getElementById('hinweis').textContent = 'Aus dem Link übernommen. Jetzt „Speichern“ tippen.';
+  // Link: #zugang=<wert>&name=<name>  → einmal übernehmen, sofort aus der Adresse entfernen
+  var h = location.hash.replace(/^#/, ''), q = {};
+  h.split('&').forEach(function (t) { var i = t.indexOf('='); if (i > 0) q[t.slice(0, i)] = decodeURIComponent(t.slice(i + 1)); });
+  if (q.zugang) {
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    document.getElementById('z').value = q.zugang;
+    document.getElementById('hinweisZ').textContent = 'Zugangscode aus dem QR-Code übernommen.';
+    if (q.name) { sessionStorage.setItem('probe_name_vor', q.name); sessionStorage.setItem('probe_neu', '1'); }
+  }
+  var vor = sessionStorage.getItem('probe_name_vor');
+  if (vor) {
+    var n = document.getElementById('n'); n.value = vor; n.readOnly = true;
+    document.getElementById('hinweisP').textContent = 'Anmeldename aus dem QR-Code. Lege jetzt dein eigenes Passwort fest.';
   }
 
-  document.getElementById('f').addEventListener('submit', function (e) {
+  document.getElementById('fZ').addEventListener('submit', function (e) {
     e.preventDefault();
-    var v = document.getElementById('p').value.trim();
-    if (!v) return;
-    localStorage.setItem(KEY, v);
-    zeigeStand();
-    // Formular entfernen: Safari erkennt so ein abgeschlossenes Anmelden und bietet das Sichern an
-    document.getElementById('formBox').innerHTML = '<p class="ok">Gespeichert.</p><p class="klein">Hat das Gerät angeboten, das Passwort zu sichern? Bitte notieren.</p>';
+    var v = document.getElementById('z').value.trim(); if (!v) return;
+    localStorage.setItem(KZ, v);
+    document.getElementById('boxZ').innerHTML = '<p class="ok">✅ Gerät verbunden.</p>';
+    setTimeout(zeige, 1500);
   });
-
+  document.getElementById('fP').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var n = document.getElementById('n').value.trim(), p = document.getElementById('p').value;
+    if (!n || !p) return;
+    localStorage.setItem(KN, n); localStorage.setItem(KP, p);
+    sessionStorage.removeItem('probe_name_vor'); sessionStorage.removeItem('probe_neu');
+    document.getElementById('boxP').innerHTML = '<p class="ok">✅ Angemeldet als ' + n + '.</p>';
+    setTimeout(zeige, 1500);
+  });
   document.getElementById('weg').addEventListener('click', function () {
-    localStorage.removeItem(KEY); location.reload();
+    localStorage.removeItem(KZ); localStorage.removeItem(KN); localStorage.removeItem(KP);
+    sessionStorage.clear(); location.reload();
   });
+  zeige();
 </script>
 </body>
 </html>
