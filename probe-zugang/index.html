@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Zugang Probe">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<title>Zugang Probe</title>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; max-width: 34rem; margin: 0 auto; padding: 1.2rem; background: #EEF4FB; color: #1d2433; }
+  h1 { font-size: 1.3rem; }
+  .box { background: #fff; border-radius: 12px; padding: 1rem; margin: 1rem 0; }
+  .ok { color: #1b7a3a; font-weight: 600; }
+  .nein { color: #a33; font-weight: 600; }
+  label { display: block; margin: .6rem 0 .2rem; }
+  input { width: 100%; font-size: 1.1rem; padding: .5rem; box-sizing: border-box; }
+  button { font-size: 1.1rem; padding: .6rem 1.2rem; margin-top: .8rem; border: 0; border-radius: 8px; background: #3B5BDB; color: #fff; }
+  .klein { font-size: .85rem; color: #556; }
+</style>
+</head>
+<body>
+<h1>Probe: Zugang über den Passwortspeicher</h1>
+<p class="klein">Nur ein Spielwert, keine echten Daten. Fassung 1 (06.11.2026).</p>
+
+<div class="box">
+  <div>Läuft gerade als: <b id="modus"></b></div>
+  <div>Auf diesem Gerät gespeichert: <span id="stand"></span></div>
+</div>
+
+<div class="box" id="formBox">
+  <form id="f" autocomplete="on">
+    <label for="u">Name</label>
+    <input id="u" name="username" autocomplete="username" value="Big Quest Probe" readonly>
+    <label for="p">Zugang</label>
+    <input id="p" name="password" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+    <p class="klein" id="hinweis"></p>
+    <button type="submit">Speichern</button>
+  </form>
+</div>
+
+<div class="box">
+  <button id="weg" type="button" style="background:#888">Gespeicherten Wert auf diesem Gerät löschen</button>
+</div>
+
+<script>
+  var KEY = 'probe_zugang';
+  var standalone = window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+  document.getElementById('modus').textContent = standalone ? 'App vom Home-Bildschirm' : 'Safari (Browser)';
+
+  function zeigeStand() {
+    var v = localStorage.getItem(KEY);
+    var el = document.getElementById('stand');
+    if (v) { el.className = 'ok'; el.textContent = 'ja (endet auf …' + v.slice(-4) + ')'; }
+    else { el.className = 'nein'; el.textContent = 'nein'; }
+  }
+  zeigeStand();
+
+  // Link-Weg: #zugang=<wert> füllt das Feld einmal und verschwindet aus der Adresse
+  var m = /^#zugang=([A-Za-z0-9_-]+)$/.exec(location.hash || '');
+  if (m) {
+    document.getElementById('p').value = m[1];
+    document.getElementById('hinweis').textContent = 'Aus dem Link übernommen. Jetzt „Speichern“ tippen.';
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  }
+
+  document.getElementById('f').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = document.getElementById('p').value.trim();
+    if (!v) return;
+    localStorage.setItem(KEY, v);
+    zeigeStand();
+    // Formular entfernen: Safari erkennt so ein abgeschlossenes Anmelden und bietet das Sichern an
+    document.getElementById('formBox').innerHTML = '<p class="ok">Gespeichert.</p><p class="klein">Hat das Gerät angeboten, das Passwort zu sichern? Bitte notieren.</p>';
+  });
+
+  document.getElementById('weg').addEventListener('click', function () {
+    localStorage.removeItem(KEY); location.reload();
+  });
+</script>
+</body>
+</html>
