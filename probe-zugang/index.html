@@ -17,111 +17,120 @@
   input { width: 100%; font-size: 1.1rem; padding: .5rem; box-sizing: border-box; }
   button { font-size: 1.1rem; padding: .6rem 1.2rem; margin-top: .8rem; border: 0; border-radius: 8px; background: #3B5BDB; color: #fff; }
   button:disabled { background: #b8c2dc; }
+  .grau { background: #888; }
   .klein { font-size: .85rem; color: #556; }
 </style>
 </head>
 <body>
-<h1>Probe: Zugangscode und Passwort</h1>
-<p class="klein">Nur Spielwerte, keine echten Daten. Fassung 3 (06.11.2026).</p>
+<h1>Probe: Erstanmeldung, Browser und Home-Bildschirm</h1>
+<p class="klein">Nur Spielwerte, keine echten Daten. Fassung 4 (06.11.2026).</p>
 
 <div class="box">
+  <p class="ok" id="verbunden" hidden>✅ Gerät verbunden.</p>
   <div>Läuft als: <b id="modus"></b></div>
   <div>Zugangscode auf diesem Gerät: <span id="standZ"></span></div>
   <div class="klein" id="woher"></div>
   <div>Angemeldet: <span id="standP"></span></div>
+  <button type="button" id="ab" class="grau" hidden>Abmelden</button>
 </div>
 
-<div class="box" id="boxP">
-  <h2>Anmelden</h2>
-  <form id="fP" autocomplete="on">
-    <label for="n">Anmeldename</label>
-    <input id="n" name="username" type="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" required>
-    <label for="p">Passwort</label>
-    <input id="p" name="password" type="password" required minlength="10"
+<!-- Erste Anmeldung (aus dem QR-Code / Link mit Namen): neues Passwort festlegen -->
+<div class="box" id="boxNeu">
+  <h2>Willkommen – Passwort festlegen</h2>
+  <form id="fNeu" action="#" method="post">
+    <label for="nNeu">Anmeldename</label>
+    <input id="nNeu" name="username" type="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" readonly>
+    <label for="pNeu">Neues Passwort</label>
+    <input id="pNeu" name="new-password" type="password" autocomplete="new-password"
            passwordrules="minlength: 10; required: lower; required: upper; required: digit;">
-    <p class="klein" id="regel">Mindestens 10 Zeichen, mit Groß- und Kleinbuchstaben und einer Ziffer.</p>
-    <p class="klein" id="hinweisP"></p>
-    <button type="submit" id="los" disabled>Anmelden</button>
+    <p class="klein">Mindestens 10 Zeichen, mit Groß- und Kleinbuchstaben und einer Ziffer. Das Gerät schlägt ein starkes Passwort vor.</p>
+    <button type="submit" id="losNeu" disabled>Anmelden</button>
+  </form>
+</div>
+
+<!-- Wieder anmelden (Browser nach dem Abmelden, Home-Bildschirm-App, weiteres Gerät) -->
+<div class="box" id="boxAlt">
+  <h2>Anmelden</h2>
+  <form id="fAlt" action="#" method="post">
+    <label for="nAlt">Anmeldename</label>
+    <input id="nAlt" name="username" type="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <label for="pAlt">Passwort</label>
+    <input id="pAlt" name="password" type="password" autocomplete="current-password">
+    <button type="submit" id="losAlt" disabled>Anmelden</button>
   </form>
 </div>
 
 <div class="box">
-  <button id="weg" type="button" style="background:#888">Alles auf diesem Gerät löschen</button>
+  <button id="weg" type="button" class="grau">Alles auf diesem Gerät löschen</button>
 </div>
 
 <script>
   var KZ = 'probe_zugang', KW = 'probe_woher', KN = 'probe_name', KP = 'probe_pw';
   var BASIS = location.origin + location.pathname.replace(/[^/]*$/, '');
   var standalone = window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
-  document.getElementById('modus').textContent = standalone ? 'App vom Home-Bildschirm' : 'Safari (Browser)';
+  document.getElementById('modus').textContent = standalone ? 'App vom Home-Bildschirm' : 'Browser';
   function ende(v) { return '…' + v.slice(-4); }
+  function $(i) { return document.getElementById(i); }
 
-  // Link bzw. Startadresse: #zugang=<wert>[&name=<name>] → übernehmen (ersetzt immer einen alten Wert), aus der Adresse entfernen
+  // Link/Startadresse: #zugang=<wert>[&name=<name>] – ersetzt immer einen alten Wert, sofort aus der Adresse entfernen
   var q = {};
   location.hash.replace(/^#/, '').split('&').forEach(function (t) { var i = t.indexOf('='); if (i > 0) q[t.slice(0, i)] = decodeURIComponent(t.slice(i + 1)); });
   if (q.zugang) {
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
     localStorage.setItem(KZ, q.zugang);
-    localStorage.setItem(KW, standalone ? 'aus der Startadresse der Home-Bildschirm-App' : 'aus dem QR-Code');
-    if (q.name) { sessionStorage.setItem('probe_name_vor', q.name); }
+    localStorage.setItem(KW, standalone ? 'aus der Startadresse der Home-Bildschirm-App' : 'aus dem QR-Code bzw. Link');
+    if (q.name) { sessionStorage.setItem('probe_neu', q.name); } else { sessionStorage.removeItem('probe_neu'); }
+    if (!standalone) $('verbunden').hidden = false;
   }
 
-  // Für "Zum Home-Bildschirm": Zugangscode in die Startadresse der App mitgeben (Manifest zur Laufzeit)
   function manifestMitZugang() {
     var z = localStorage.getItem(KZ); if (!z) return;
     var m = { name: 'Zugang Probe', short_name: 'Zugang Probe', display: 'standalone',
       start_url: BASIS + 'index.html#zugang=' + encodeURIComponent(z), scope: BASIS,
       background_color: '#EEF4FB', theme_color: '#3B5BDB',
       icons: [{ src: BASIS + '../icon-192.png', sizes: '192x192', type: 'image/png' }, { src: BASIS + '../icon-512.png', sizes: '512x512', type: 'image/png' }] };
-    document.getElementById('mf').setAttribute('href', 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(m)));
+    $('mf').setAttribute('href', 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(m)));
   }
 
-  function zeige() {
+  // nur das passende Formular bleibt im Dokument (sonst verwechselt das Gerät die Felder)
+  var neuName = sessionStorage.getItem('probe_neu');
+  var z = localStorage.getItem(KZ), n = localStorage.getItem(KN);
+  var zeigeNeu = !!(z && !n && neuName), zeigeAlt = !!(z && !n && !neuName);
+  if (!zeigeNeu) $('boxNeu').remove(); else $('nNeu').value = neuName;
+  if (!zeigeAlt) $('boxAlt').remove();
+
+  function stand() {
     var z = localStorage.getItem(KZ), n = localStorage.getItem(KN), p = localStorage.getItem(KP);
-    var sZ = document.getElementById('standZ'), sP = document.getElementById('standP');
-    sZ.className = z ? 'ok' : 'nein'; sZ.textContent = z ? 'ja (endet auf ' + ende(z) + ')' : 'nein';
-    document.getElementById('woher').textContent = z ? 'kam ' + (localStorage.getItem(KW) || '?') : '';
-    sP.className = n ? 'ok' : 'nein'; sP.textContent = n ? n + ' (Passwort endet auf ' + ende(p) + ')' : 'nein';
-    document.getElementById('boxP').style.display = (z && !n) ? '' : 'none';
+    $('standZ').className = z ? 'ok' : 'nein'; $('standZ').textContent = z ? 'ja (endet auf ' + ende(z) + ')' : 'nein – bitte QR-Code scannen';
+    $('woher').textContent = z ? 'kam ' + (localStorage.getItem(KW) || '?') : '';
+    $('standP').className = n ? 'ok' : 'nein'; $('standP').textContent = n ? n + ' (Passwort endet auf ' + ende(p) + ')' : 'nein';
+    $('ab').hidden = !n;
   }
-
-  var vor = sessionStorage.getItem('probe_name_vor'), pw = document.getElementById('p');
-  if (vor) {
-    document.getElementById('n').value = vor;
-    pw.setAttribute('autocomplete', 'new-password');
-    document.getElementById('hinweisP').textContent = 'Anmeldename aus dem QR-Code. Lege jetzt dein Passwort fest.';
-  } else {
-    pw.setAttribute('autocomplete', 'current-password');
-    document.getElementById('regel').style.display = 'none';
-  }
+  function gutNeu(v) { return v.length >= 10 && /[a-z]/.test(v) && /[A-Z]/.test(v) && /\d/.test(v); }
   function pruefe() {
-    var v = pw.value, n = document.getElementById('n').value.trim();
-    var gut = vor ? (v.length >= 10 && /[a-z]/.test(v) && /[A-Z]/.test(v) && /\d/.test(v)) : v.length > 0;
-    document.getElementById('los').disabled = !(gut && n);
+    if ($('losNeu')) $('losNeu').disabled = !gutNeu($('pNeu').value);
+    if ($('losAlt')) $('losAlt').disabled = !($('nAlt').value.trim() && $('pAlt').value);
   }
-  pw.addEventListener('input', pruefe); document.getElementById('n').addEventListener('input', pruefe);
-  setInterval(pruefe, 500); // Ausfüllen durch den Passwortspeicher löst nicht immer "input" aus
+  setInterval(pruefe, 400); // Ausfüllen durch den Passwortspeicher löst nicht immer "input" aus
+  document.addEventListener('input', pruefe);
 
-  document.getElementById('fP').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var n = document.getElementById('n').value.trim(), p = pw.value;
-    if (!n || !p) return;
-    localStorage.setItem(KN, n); localStorage.setItem(KP, p);
-    sessionStorage.removeItem('probe_name_vor');
-    document.getElementById('boxP').innerHTML = '<p class="ok">✅ Angemeldet als ' + n + '.</p>';
-    setTimeout(zeige, 1500);
-  });
-  document.getElementById('weg').addEventListener('click', function () {
-    [KZ, KW, KN, KP].forEach(function (k) { localStorage.removeItem(k); });
-    sessionStorage.clear(); location.reload();
-  });
-  manifestMitZugang();
-  zeige();
-  if (q.zugang && !standalone) {
-    var b = document.createElement('p'); b.className = 'ok'; b.textContent = '✅ Gerät verbunden.';
-    document.querySelector('.box').prepend(b);
+  function angemeldet(form, name, pw) {
+    localStorage.setItem(KN, name); localStorage.setItem(KP, pw);
+    sessionStorage.removeItem('probe_neu');
+    form.parentNode.innerHTML = '<p class="ok">✅ Angemeldet als ' + name + '.</p>';
+    stand();
   }
-  pruefe();
+  if ($('fNeu')) $('fNeu').addEventListener('submit', function (e) {
+    e.preventDefault(); var p = $('pNeu').value; if (!gutNeu(p)) return; angemeldet(this, $('nNeu').value, p);
+  });
+  if ($('fAlt')) $('fAlt').addEventListener('submit', function (e) {
+    e.preventDefault(); var n = $('nAlt').value.trim(), p = $('pAlt').value; if (!n || !p) return; angemeldet(this, n, p);
+  });
+  $('ab').addEventListener('click', function () { localStorage.removeItem(KN); localStorage.removeItem(KP); sessionStorage.removeItem('probe_neu'); location.reload(); });
+  $('weg').addEventListener('click', function () {
+    [KZ, KW, KN, KP].forEach(function (k) { localStorage.removeItem(k); }); sessionStorage.clear(); location.reload();
+  });
+  manifestMitZugang(); stand(); pruefe();
 </script>
 </body>
 </html>
