@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Probe Passwort-Vorschlag</title>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; max-width: 34rem; margin: 0 auto; padding: 1.2rem; background: #EEF4FB; color: #1d2433; }
+  h1 { font-size: 1.3rem; } h2 { font-size: 1.05rem; margin: 0 0 .4rem; }
+  .box { background: #fff; border-radius: 12px; padding: 1rem; margin: 1rem 0; }
+  label { display: block; margin: .6rem 0 .2rem; }
+  input { width: 100%; font-size: 1.1rem; padding: .5rem; box-sizing: border-box; }
+  button { font-size: 1.1rem; padding: .6rem 1.2rem; margin-top: .8rem; border: 0; border-radius: 8px; background: #3B5BDB; color: #fff; }
+  nav a { display: inline-block; margin: 0 .6rem .4rem 0; padding: .4rem .8rem; background: #fff; border-radius: 8px; text-decoration: none; }
+  nav a.aktiv { background: #3B5BDB; color: #fff; }
+  .klein { font-size: .85rem; color: #556; }
+</style>
+</head>
+<body>
+<h1>Probe: Schlägt das iPhone ein starkes Passwort vor?</h1>
+<p class="klein">Nur ins Passwortfeld tippen, nichts absenden. Fassung 1 (06.11.2026).</p>
+<nav><a href="?v=1" id="l1">Variante 1</a><a href="?v=2" id="l2">Variante 2</a><a href="?v=3" id="l3">Variante 3</a></nav>
+
+<!-- Variante 1: Anmeldename sichtbar + ein Feld "new-password", fest im HTML -->
+<div class="box" id="v1" hidden>
+  <h2>Variante 1 – ein Passwortfeld</h2>
+  <form action="#" method="post" onsubmit="return false">
+    <label for="u1">Anmeldename</label>
+    <input id="u1" name="username" type="text" autocomplete="username" value="probe.vorschlag1">
+    <label for="p1">Passwort</label>
+    <input id="p1" name="new-password" type="password" autocomplete="new-password">
+    <button type="submit">Anmelden</button>
+  </form>
+</div>
+
+<!-- Variante 2: wie 1, plus "Passwort wiederholen" -->
+<div class="box" id="v2" hidden>
+  <h2>Variante 2 – mit „Passwort wiederholen“</h2>
+  <form action="#" method="post" onsubmit="return false">
+    <label for="u2">Anmeldename</label>
+    <input id="u2" name="username" type="text" autocomplete="username" value="probe.vorschlag2">
+    <label for="p2">Neues Passwort</label>
+    <input id="p2" name="new-password" type="password" autocomplete="new-password">
+    <label for="p2b">Passwort wiederholen</label>
+    <input id="p2b" name="confirm-password" type="password" autocomplete="new-password">
+    <button type="submit">Konto erstellen</button>
+  </form>
+</div>
+
+<!-- Variante 3: wie 2, plus Passwortregeln und Anmeldename als E-Mail-artiges Feld -->
+<div class="box" id="v3" hidden>
+  <h2>Variante 3 – mit Passwortregeln</h2>
+  <form action="#" method="post" onsubmit="return false">
+    <label for="u3">Anmeldename</label>
+    <input id="u3" name="email" type="email" autocomplete="username" value="probe.vorschlag3@bigquest.test">
+    <label for="p3">Neues Passwort</label>
+    <input id="p3" name="new-password" type="password" autocomplete="new-password"
+           passwordrules="minlength: 12; required: lower; required: upper; required: digit;">
+    <label for="p3b">Passwort wiederholen</label>
+    <input id="p3b" name="confirm-password" type="password" autocomplete="new-password"
+           passwordrules="minlength: 12; required: lower; required: upper; required: digit;">
+    <button type="submit">Konto erstellen</button>
+  </form>
+</div>
+
+<script>
+  var v = (/[?&]v=(\d)/.exec(location.search) || [])[1] || '1';
+  ['1', '2', '3'].forEach(function (k) { if (k !== v) document.getElementById('v' + k).remove(); });
+  document.getElementById('v' + v).hidden = false;
+  document.getElementById('l' + v).className = 'aktiv';
+</script>
+</body>
+</html>
